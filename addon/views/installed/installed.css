@@ -1,0 +1,89 @@
+body {
+  background-color: rgb(249,249,250);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: rgb(53, 53, 54);
+}
+.container {
+  width:49em;
+  margin: 0 auto;  
+}
+h1 {
+  margin: 20px 0 0 0;
+  font-size: 30px;
+}
+
+hr {
+  color: rgb(230, 230, 231);
+  border-style: none;
+  border-top-style: solid;
+}
+
+.splash {
+  border-radius: 10px;
+  background-color: white;
+  border-color: #ddd;
+  padding: 5px 25px 25px;
+}
+#header {
+  font-size:20px;
+  margin-bottom: 15px;
+}
+
+#logo {
+  width: 96px;
+  float: left;
+  margin-left: 10px;
+  margin-right:8px;
+  margin-top:-38px;
+  vertical-align: bottom;
+}
+
+.button {
+	background-color:#44c767;
+	border-radius:28px;
+	border:1px solid #18ab29;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:22px;
+	padding:16px 31px;
+	text-decoration:none;
+  text-shadow:0px 1px 0px #2f6627;
+  max-width: 15em;
+  min-height: 6em;
+  float:left;
+}
+.button.nope {
+	background-color:#c74467;
+	border:1px solid #ab1829;
+  float:right;
+}
+.button:hover {
+	background-color:#5cbf2a;
+}
+.button.nope:hover {
+	background-color:#bf2c2a;
+}
+.button:active {
+	position:relative;
+	top:1px;
+}
+.clear {
+  clear: both;
+}
+
+.post-privacy-selection {
+  display: none;
+}
+.selection-done .post-privacy-selection {
+  display: block;
+}
+.selection-done .privacy-selection {
+  display: none;
+}
+.bordered {
+  border: 1px solid blue;
+  padding: 0 3px 3px 3px;
+  color: blue;
+}

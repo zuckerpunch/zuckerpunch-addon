@@ -1,0 +1,24 @@
+{
+    "name": "zuckerpunch-package",
+    "version": "1.0.1",
+    "dependencies": {
+        "dompurify": "^2.0.15",
+        "fs-extra": "^9.0.0",
+        "moment": "^2.24.0",
+        "moment-timezone": "^0.5.28",
+        "onchange": "^7.0.2",
+        "zip-folder": "^1.0.0"
+    },
+    "scripts": {
+        "build": "node build.js",
+        "watch": "onchange \"addon/**/*.*\" -- npm run build"
+    },
+    "devDependencies": {
+        "eslint": "^7.8.1",
+        "eslint-config-standard": "^14.1.1",
+        "eslint-plugin-import": "^2.22.0",
+        "eslint-plugin-node": "^11.1.0",
+        "eslint-plugin-promise": "^4.2.1",
+        "eslint-plugin-standard": "^4.0.1"
+    }
+}

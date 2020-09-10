@@ -1,0 +1,134 @@
+html, body {
+  padding: 0;
+  margin: 0;
+  font-family: Consolas,Verdana, sans-serif;
+  background-color: black;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+#canvas { 
+  width: 750px; 
+  height: 575px;
+  overflow: auto;
+}
+#empty_splash {
+  display: none;
+  position:absolute;
+  left:120px;
+  top:180px;
+  width: 500px;
+  color: white;
+}
+#empty_splash a {
+  color: pink;
+}
+.json_empty #empty_splash {
+  display: block;
+}
+
+#json {
+  filter: invert(1);
+  background-color: white;
+}
+.json_empty #json {
+  display: none;
+}
+
+#not_json {
+  position:absolute;
+  right:2px;
+  top:10px;
+  padding: 0 0 10px 10px;
+  width: 340px;
+  background-color: #eee;
+  transition: all 0.5s ease-in-out;
+  border: 2px solid #FF7AD2;
+  border-radius:10px;
+}
+
+#header {
+  font-size:20px;
+  margin-bottom: 15px;
+}
+
+#logo {
+  width: 96px;
+  float: left;
+  margin-right:8px;
+  margin-top:-38px;
+  vertical-align: bottom;
+}
+
+#copy_to_clipboard {
+  font-weight: bold;
+  font-size: 21px;
+  cursor: copy;
+}
+.json_empty #copy_to_clipboard {
+  display: none;
+}
+
+#copy_helper { position: absolute; z-index: -10000; opacity: 0; }
+
+#debug_json {
+  width: 95%;
+  height:10em;
+  font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
+  font-size: 10px;
+}
+
+#debug_panel {
+  display: none;
+}
+
+h1 {
+  margin: 20px 0 0 0;
+  font-size: 30px;
+}
+
+.button-rounded {
+  background: #2fc974;
+  color: #fff;
+  display: block;
+  padding: 20px 10px;
+  text-align: center;
+  text-decoration: none;
+  width: 90%;
+  border-radius: 8px;
+}
+
+.button-rounded:active {
+  background-color: #3e8e41;
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
+}
+
+.box {
+  position: relative;
+  display: inline-block;
+  transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transform: scale(0.75, 0.75);
+}
+
+.box::after {
+  content: "";
+  border-radius: 5px;
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  width: auto;
+  height: 100%;
+  box-shadow: 6px 8px 25px 6px rgba(255,162,230,0.5);
+  opacity: 0;
+  transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.box:hover {
+  transform: scale(1.0, 1.0);
+}
+
+.box:hover::after {
+    opacity: 1;
+}

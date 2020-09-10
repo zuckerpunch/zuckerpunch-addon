@@ -1,0 +1,100 @@
+<html>
+    <head>
+        <title>Date Parse Tests</title>
+        <meta charset="UTF-8">
+        <script src="../addon/utils/dateutils.js"></script>
+    </head>
+    <body>
+        <h1>Date Parse tests</h1>
+        <textarea cols="140" rows="20" id="data">
+{
+    "2010-10-20T20:10:00+0300":                                             "2010-10-20T20:10:00+0300",
+    "2010-10-20T20:10:00+03:00":                                            "2010-10-20T20:10:00+0300",
+    "October 31st 2010|Oct 31 at 10:00 AM - 10:30 PM · CST|null":           "2010-10-31T10:00:00-0600|2010-10-31T22:30:00-0600",
+    "Friday, April 17, 2020|4:00 PM":                                       "2020-04-17T16:00:00+0000",
+    "Friday, April 17, 2020|4:00 PM|europe/london":                         "2020-04-17T16:00:00+0100",
+    "Friday, April 17, 2020|4:00 PM|europe/zurich":                         "2020-04-17T16:00:00+0200",
+    "Onsdag den 17. februar 2021|19.00|Etc/UCT":                            "2021-02-17T19:00:00+0000",
+    "Середа, 1 квітня 2020 р.|КВІ 1 ср 12:00|America/Chicago":              "2020-04-01T17:00:00.000Z",
+    "Mittwoch, 1. März 2020|Mi 12:00|America/Chicago":                      "2020-03-01T18:00:00.000Z",
+    "Mittwoch, 1. April 2020|APR 1 Mi 12:00|America/Chicago":               "2020-04-01T17:00:00.000Z",
+    "Mardi 31 mars 2020|MAR 31 mar 06:00|Etc/UCT":                          "2020-03-31T06:00:00.000Z",    
+    "Mercredi 1 avril 2020|AVR 1 mer 18:30|America/Chicago":                "2020-04-01T23:30:00.000Z",
+    "Fredag 11. desember 2020|DES. 11. fr. 19:00|Europe/London":            "2020-12-11T19:00:00.000Z",
+    "Quarta-feira, 1 de abril de 2020|ABR 1 Qua 12:00|America/Chicago":     "2020-04-01T17:00:00.000Z",
+    "2021年1月17日水曜日|19:00|europe/london":                               "2021-01-17T19:00:00+0000",
+    "2021年12月17日水曜日|19:00|europe/london":                              "2021-12-17T19:00:00+0000",
+    "Среда, 1 апреля 2020 г.|АПР 1 Ср 18:30|America/Chicago":               "2020-04-01T23:30:00.000Z",
+    "‏יום שלישי, 31 במרץ 2020‏|מרץ 31 שלישי 6:00|Etc/UCT":                  "2020-03-31T06:00:00.000Z",
+    "2020年3月30日周一|3 月 30日 周一 06:00|Etc/UCT":                        "2020-03-30T06:00:00.000Z",
+    "बुधवार, 1 अप्रैल 2020|अप्रैल 1 बुध 6:30 अपराह्न|America/Chicago":              "2020-04-01T23:30:00.000Z",
+    "Poniedziałek, 30 marca 2020|MAR 30 pon. 06:00":                        "2020-03-30T06:00:00.000Z",
+    "Tirsdag den 24. marts 2020|06.00-00.00 UTC+01|null":                   "2020-03-24T05:00:00.000Z|2020-03-24T23:00:00.000Z",
+    "Lördag 2 januari 2021|14:30 - 17:15 UTC":                              "2021-01-02T14:30:00.000Z|2021-01-02T17:15:00.000Z",
+    "Viernes, 9 de abril de 2021|19:30 - 22:00 UTC+02|europe/madrid":       "2021-04-09T19:30:00+0200|2021-04-09T22:00:00+0200",
+    "2020-06-19T15:00:00+01:00 to 2020-06-20T14:30:00+01:00":               "2020-06-19T15:00:00+0100|2020-06-20T14:30:00+0100"
+}
+        </textarea><br />
+        <button onclick="run()">Run</button><br/>
+        <textarea cols="120" rows=3 id="errors">none :)</textarea><br>
+        Month names: <input id="lang" value="en" onchange="getMonthNames()"  /><br/>
+
+        <textarea id="months"></textarea>
+    </body>
+    <script>
+        function run() {
+            document.querySelector("#errors").value = "running...";
+            document.querySelector("#errors").style.borderColor = "green";
+
+            let errors = "";
+            let date = null;
+
+            let data_json = document.querySelector("#data").value;
+            try {
+                data = JSON.parse(data_json);
+            } catch (error) {
+                document.querySelector("#errors").value = "🤮 Can't parse your JSON my dear terminal operator!\n\n"+error;
+                return;
+            }
+
+            for (let testKey in data) {
+                let result = data[testKey];
+                let test = testKey.split('|');
+                let testDate = test[0];
+                let testTime = test.length>1 ? test[1] : null;
+                let testTimezone = test.length>2 ? test[2]=="null" ? null: test[2] : "Etc/UCT";
+
+                try {
+                    let expectedResult = { start: new Date(Date.parse(result.split('|')[0])), end: result.includes('|')? new Date(Date.parse(result.split('|')[1])):null };
+                    let testResultDate = DateUtils.parseDate(testDate, testTime, testTimezone);
+                    if (testResultDate.start == null) errors += '"'+testKey+'" ⚠️ evaluates to null\n\n';
+                    if (expectedResult.start == null) errors += '"'+ result + ' ⚠️ evaluates to null\n\n';
+                    if (testResultDate.start != null && expectedResult.start != null && expectedResult.start.getTime() != testResultDate.start.getTime()) errors += '"'+testKey+'" ⚠️ ' +' evaluates to '+testResultDate.start.toISOString()+' - expecting ' + expectedResult.start.toISOString() + '\n';
+                    if (testResultDate.end == null && expectedResult.end != null) errors += '"'+testKey+'" ⚠️ ' +' end time evaluates to null\n';
+                    if (testResultDate.end != null && expectedResult.end != null && expectedResult.end.getTime() != testResultDate.end.getTime()) errors += '"'+testKey+'" ⚠️ ' +' end evaluates to '+testResultDate.end.toISOString()+' - expecting ' + expectedResult.end.toISOString() + '\n';
+                } catch (error) {
+                    errors += '"'+testKey+'" ❌ ' + error + ' (line ' + error.lineNumber +', ' + error.fileName.substring(error.fileName.lastIndexOf('/')+1); + ')\n\nxx';
+                }
+            }
+            if (errors) {
+                document.querySelector("#errors").value = errors;
+                document.querySelector("#errors").style.borderColor = "red";
+            } else {
+                document.querySelector("#errors").value = "👍 All tests passed without error";
+            }
+        }
+        run();
+        getMonthNames();
+
+        function getMonthNames() {
+            var lang = document.querySelector("#lang").value
+            var format = new Intl.DateTimeFormat(lang, { month: 'long' })
+            var months = []
+            for (var month = 0; month < 12; month++) {
+                var testDate = new Date(Date.UTC(2000, month, 1, 0, 0, 0));
+                months.push(format.format(testDate))
+            }
+            document.querySelector("#months").value = months.join('\n');
+        }
+    </script>
+</html>

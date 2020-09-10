@@ -1,0 +1,47 @@
+{
+  "name": "Zuckerpunch - events in our hands",
+  "description": "Convert Facebook events into JSON and crowdsource it, simply by browsing as usual. The JSON is available to you via the toolbar, and, with the permission of the event organizers, we make it publicly available to everyone. Give the Zuck a punch ❤️",
+  "version": "1.0.1",
+  "permissions": [
+    "https://*.facebook.com/*",
+    "https://*.fbcdn.net/*",
+    "webRequest",
+    "webRequestBlocking",
+    "storage",
+    "tabs",
+    "debugger"
+  ],
+  "background": {
+    "page": "./background/background_chrome.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.facebook.com/*"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true,
+      "js": [
+        "./utils/objutils.js",
+        "./content_scripts/about.js",
+        "./content_scripts/events.js",
+        "./content_scripts/xhr_intercept.js"
+      ]
+    }
+  ],
+  "browser_action": {
+    "default_icon": {
+      "19": "./images/icon-19.png",
+      "38": "./images/icon-38.png"
+    },
+    "default_title": "Zuckerpunch",
+    "default_popup": "./views/popup/popup.html"
+  },
+  "icons": {
+    "48": "./images/icon-48.png",
+    "96": "./images/icon-96.png"  },
+  "options_ui": {
+    "page": "./views/options/options.html"
+  },
+  "manifest_version": 2
+}

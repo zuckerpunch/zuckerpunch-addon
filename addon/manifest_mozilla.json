@@ -1,0 +1,55 @@
+{
+  "name": "Zuckerpunch - events in our hands",
+  "description": "Convert Facebook events into JSON and crowdsource it, simply by browsing as usual. The JSON is available to you via the toolbar, and, with the permission of the event organizers, we make it publicly available to everyone. Give the Zuck a punch ❤️",
+  "version": "1.0.1",
+  "developer": {
+    "name": "zuckerpunch",
+    "url": "https://github.com/zuckerpunch"
+  },
+  "applications": {
+    "gecko": {"id": "zuckerpunch@protonmail.com"}
+  },
+  "permissions": [
+    "https://*.facebook.com/*",
+    "https://*.fbcdn.net/*",
+    "webRequest",
+    "webRequestBlocking",
+    "storage",
+    "tabs"
+  ],
+
+  "background": {
+    "page": "./background/background_mozilla.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.facebook.com/*"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true,
+      "js": [
+        "./utils/objutils.js",
+        "./content_scripts/about.js",
+        "./content_scripts/events.js",
+        "./content_scripts/xhr_intercept.js"
+      ]
+    }
+  ],
+  "browser_action": {
+    "default_icon": {
+      "19": "./images/icon.svg",
+      "38": "./images/icon.svg"
+    },
+    "default_title": "Zuckerpunch",
+    "default_popup": "./views/popup/popup.html"
+  },
+  "icons": {
+    "48": "./images/icon.svg",
+    "96": "./images/icon.svg"
+  },
+  "options_ui": {
+    "page": "./views/options/options.html"
+  },
+  "manifest_version": 2
+}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <form style="margin: 20px 0;">
+        <label>Puncher ID<br/> <input type="text" id="puncher_id" size="45"></label><br/>
+        <br/>
+        <label>Crowdsource Endpoint<br/> <input type="text" id="endpoint" size="45"></label><br/>
+        <br/>
+        <label>Crowdsource Endpoint Type<br/> <select id="endpoint_type"><option value="upsert">Std UPSERT service</option><option value="zuckerpunch">Zuckerpunch API</option></select><br/>
+        <br/>
+        <label>Debug<br/> <input type="checkbox" id="debug"> debug: show raw data in popup, discarded in console</label><br/>
+        <br/>
+        <label>Privacy Policy accepted<br/> <input type="checkbox" id="privacypolicyaccept"> privacy policy accepted: crowdsourcing service may be called</label><br/>
+        <!-- <br/>
+        <label title="Don't use this while logged in...">Auto-open Lists<br/> 
+        <input type="checkbox" id="autoexpand" /> automatically open <strong>+N</strong> links to get all times. <br/>
+        &nbsp;⚠️ Using this may make your traffic suspicious.</label><br/> -->
+        <br /><br/>
+        <button type="submit">Save</button>
+    </form>
+    <script src="options.js"></script>
+  </body>
+</html>

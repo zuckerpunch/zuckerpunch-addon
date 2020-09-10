@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="popup.css"/>
+    <link rel="stylesheet" href="json-viewer.css">
+  </head>
+  <body>
+    <div id="canvas">
+      <div id="empty_splash">
+        <h1>Uhh... It's dark in here...</h1>
+        <h2>Browse events on Facebook to see JSON data here.</h2>
+        <h3>Want inspiration? Check <a href="https://www.google.com/search?q=site%3Afacebook.com+inurl%3A%2Fevents%2F">this list of venues</a>.</h3>
+      </div>
+      <div id="json"></div>
+      <div id="not_json" class="box">
+        <div id="header">
+          <img src="../../images/icon.svg" id="logo" />
+          <h1>Zuckerpunch</h1>
+          <div>Events In Our Hands</div>
+        </div>
+        <div id="crowdsource_promote">
+          <p><strong>Join the crowd!</strong> Please consider joining our crowdsource effort by updating <a href="#" id="privacypolicylink">your Privacy Policy setting</a>.</p>
+        </div>
+        <div id="copy_to_clipboard" class="button-rounded">
+          📋 COPY TO CLIPBOARD
+          <textarea id="copy_helper"></textarea>
+        </div>
+        
+        <div id="debug_panel">
+          <label for="debug_json">Raw JSON collected and analyzed:</label><br/>
+          <textarea id="debug_json" spellcheck="false" wrap="soft"></textarea>
+        </div>
+      </div>
+    </div>
+    <script src="json-viewer.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
