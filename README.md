@@ -1,16 +1,18 @@
 # Zuckerpunch - events in our hands
-Version 1.0: Works across browsers and fb designs, good data/image sniffing, code refactored and linted.
+
+Install now on Mozilla Firefox: https://addons.mozilla.org/en-US/firefox/addon/zuckerpunch/
 
 To build and install the Zuckerpunch add-on: 
 - [Build](#how-to-build) 
 - [Firefox install](#firefox-install)
 - [Chrome install](#chrome-install)
 - [Use](#using-zuckerpunch)
+- [Version info](#versions)
 
 # About
 Zuckerpunch is a Firefox and Chrome add-on which collects JSON from public events as you browse them on Facebook.
 
-The JSON is simple to navigate and export via a toolbar popup button and, if you have opted in, is sent to a crowdsource service in the background. 
+The JSON is simple to navigate and export via a toolbar button and, if you have opted in, is sent to a crowdsource service in the background. 
 
 Crowdsourced data is only published with the consent of the copyright holders.
 
@@ -86,11 +88,15 @@ The JSON you get will be structured like this:
 ```
 
 # how-to-build
-Fetch the repo and run `npm run build` at the root.
+First time: Fetch the repo and run `npm install` at the root.
+
+To build run `npm run build` at the root.
 
 If you plan to develop and build automatically, also run `npm run watch`.
 
 # firefox-install
+To install the developer version:
+
 Ensure you ran [npm run build](#how-to-build) and then do the following in Firefox:
 
 1. Go to `about:debugging#/runtime/this-firefox`
@@ -110,6 +116,8 @@ If you want to hook up to a custom REST Upsert service or a zuckerpunch service,
 8. Configure the endpoint and save.
 
 # chrome-install
+To install the developer version:
+
 Ensure you ran [npm run build](#how-to-build) and then do the following in Chrome:
 
 1. Go to `chrome://extensions/`
@@ -144,3 +152,8 @@ You will break no law if you use this add-on and use the collected JSON for pers
 You cannot publish the data you collect without prior consent from the entity that created the event on Facebook. Failing to do so will infringe on their copyright and you become legally liable.
 
 Using the Zuckerpunch add-on is in breach of Facebook's Terms of Service. If you have accepted these terms, using this add-on COULD get your Facebook account banned, but so far this has never happened.
+
+# versions
+Version 1.0.2: Prepared for Chrome's add-on store (pending).
+Version 1.0.1: Prepared for Mozilla's add-on store (passed).
+Version 1.0.0: Works across browsers and fb designs, good data/image sniffing, code refactored and linted.
