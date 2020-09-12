@@ -66,7 +66,7 @@ function writeZip (dir, zipPath) {
     if (err) {
       console.log("oh no!", err)
     } else {
-      console.log( zipPath + " ready")
+      console.log(zipPath + " ready")
     }
   })
 };

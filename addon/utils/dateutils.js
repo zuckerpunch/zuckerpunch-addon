@@ -4,16 +4,16 @@
 class DateUtils {
   static getUtcOffset (d, timeZone) {
     const zones = Array.from({ length: 24 }, (_, i) => ({ diff: i - 12 }))
-    for (var index in zones) {
+    const actualTime = d.toLocaleString("en-US", { timeZone: timeZone })
+    console.log(actualTime)
+    for (var zoneDiff = -12; zoneDiff < 15; zoneDiff++) {
       const d2 = new Date(d)
-      const zone = zones[index]
-      d2.setHours(d.getHours() + zone.diff)
-      if (d.toLocaleString("en-US", { timeZone: timeZone }) === d2.toLocaleString("en-US", { timeZone: "Etc/UTC" })) {
-        if (index > 0) {
-          zones.splice(index, 1)
-          zones.unshift(zone)
+      d2.setHours(d.getHours() + zoneDiff)
+      for (var quater = 0; quater < 4; quater++) {
+        d2.setMinutes(d.getMinutes() + 15 * quater)
+        if (actualTime === d2.toLocaleString("en-US", { timeZone: "Etc/UTC" })) {
+          return zoneDiff + quater * 0.25
         }
-        return zone.diff
       }
     }
     return null
@@ -46,7 +46,8 @@ class DateUtils {
         const utcString = DateUtils.tryGetUtcString(timeString) || DateUtils.tryGetUtcString(dateString) || ""
         timeString = timeString.replace("अपराह्न", "PM")
         dateString = dateString.replace("अपराह्न", "PM")
-        const hourMatches = timeString.match(/([0-2]?[0-9](:|\.)[0-5][0-9](.[AP][M])?)/g) || dateString.match(/([0-2]?[0-9](:|\.)[0-5][0-9](.[AP][M])?)/g)
+        const timeRegex = /[0-2]?[0-9](:|\.)[0-5][0-9](.[AP][M])?|(([0-5]*)[0-9](.[AP][M]))/g
+        const hourMatches = timeString.match(timeRegex) || dateString.match(timeRegex)
 
         let startDateString = dateString; let endDateString = dateString
         if (hourMatches && hourMatches.length === 2 && dateString.includes(" – ")) {
@@ -56,7 +57,10 @@ class DateUtils {
 
         if (hourMatches) {
           time.start = DateUtils.intlDateParse(startDateString, hourMatches[0], utcString, timezone)
-          if (hourMatches.length > 1) { time.end = DateUtils.intlDateParse(endDateString, hourMatches[1], utcString, timezone) }
+          if (hourMatches.length > 1) {
+            time.end = DateUtils.intlDateParse(endDateString, hourMatches[1], utcString, timezone)
+            if (time.end == null) time.end = DateUtils.intlDateParse(startDateString, hourMatches[1], utcString, timezone)
+          }
           if (time.end < time.start) time.end = new Date(time.end.getTime() + 60 * 60 * 24 * 1000)
         }
       }
@@ -71,20 +75,25 @@ class DateUtils {
   static intlDateParse (dateString, timeString, utcString, timezone) {
     if (!utcString && !timezone) { return null }
 
+    const timeDigitGroups = timeString.match(/\d+/g)
+    if (timeDigitGroups.length === 1) {
+      timeString = timeString.replace(timeDigitGroups[0], timeDigitGroups[0] + ":00")
+    }
+
     const monthMap = [
-    // en         cn/jp   es         fr          de          pt          uk          ru         sv          da        da-short    nb          pl            he        hi
-      "January    1月     enero      janvier     Januar      janeiro     січня       января     januari     januar    JAN.        januar      stycznia      בינואר    जनवरी       ",
-      "February   2月     febrero    février     Februar     fevereiro   лютого      февраля    februari    februar   FEB.        februar     lutego        בפברואר   फ़रवरी      ",
-      "March      3月     marzo      mars        März        março       березня     марта      mars        marts     MAR.        mars        marca         במרץ      मार्च       ",
-      "April      4月     abril      avril       April       abril       квітня      апреля     april       april     APR.        april       kwietnia      באפריל    अप्रैल      ",
-      "May        5月     mayo       mai         Mai         maio        травня      мая        maj         maj       MAJ         mai         maja          במאי      मई          ",
-      "June       6月     junio      juin        Juni        junho       червня      июня       juni        juni      JUN.        juni        czerwca       ביולי     जून         ",
-      "July       7月     julio      juillet     Juli        julho       липня       июля       juli        juli      JUL.        juli        lipca         ביולי     जुलाई       ",
-      "August     8月     agosto     août        August      agosto      серпня      августа    augusti     august    AUG.        august      sierpnia      באוגוסט   अगस्त       ",
-      "September  9月     septiembr  septembre   September   setembro    вересня     сентября   september   september SEP.        september   września      בספטמבר   सितंबर      ",
-      "October    10月    octubre    octobre     Oktober     outubro     жовтня      октября    oktober     oktober   OKT.        oktober     października  באוקטובר  अक्तूबर     ",
-      "November   11月    noviembre  novembre    November    novembro    листопада   ноября     november    november  NOV.        november    listopada     בנובמבר   नवंबर       ",
-      "December   12月    diciembre  décembre    Dezember    dezembro    грудня      декабря    december    december  DEC.        desember    grudnia       בדצמבר    दिसंबर      "]
+    // en         en-short  cn/jp   es         fr          de          pt          uk          ru         sv          da        da-short    nb          pl            he        hi
+      "January    Jan       1月     enero      janvier     Januar      janeiro     січня       января     januari     januar    JAN.        januar      stycznia      בינואר    जनवरी       ",
+      "February   Feb       2月     febrero    février     Februar     fevereiro   лютого      февраля    februari    februar   FEB.        februar     lutego        בפברואר   फ़रवरी      ",
+      "March      Mar       3月     marzo      mars        März        março       березня     марта      mars        marts     MAR.        mars        marca         במרץ      मार्च       ",
+      "April      Apr       4月     abril      avril       April       abril       квітня      апреля     april       april     APR.        april       kwietnia      באפריל    अप्रैल      ",
+      "May        May       5月     mayo       mai         Mai         maio        травня      мая        maj         maj       MAJ         mai         maja          במאי      मई          ",
+      "June       Jun       6月     junio      juin        Juni        junho       червня      июня       juni        juni      JUN.        juni        czerwca       ביולי     जून         ",
+      "July       Jul       7月     julio      juillet     Juli        julho       липня       июля       juli        juli      JUL.        juli        lipca         ביולי     जुलाई       ",
+      "August     Aug       8月     agosto     août        August      agosto      серпня      августа    augusti     august    AUG.        august      sierpnia      באוגוסט   अगस्त       ",
+      "September  Sep       9月     septiembr  septembre   September   setembro    вересня     сентября   september   september SEP.        september   września      בספטמבר   सितंबर      ",
+      "October    Oct       10月    octubre    octobre     Oktober     outubro     жовтня      октября    oktober     oktober   OKT.        oktober     października  באוקטובר  अक्तूबर     ",
+      "November   Nov       11月    noviembre  novembre    November    novembro    листопада   ноября     november    november  NOV.        november    listopada     בנובמבר   नवंबर       ",
+      "December   Dec       12月    diciembre  décembre    Dezember    dezembro    грудня      декабря    december    december  DEC.        desember    grudnia       בדצמבר    दिसंबर      "]
 
     let m = null
     for (var monthIdx = 11; monthIdx > -1 && !m; monthIdx--) {
@@ -108,7 +117,9 @@ class DateUtils {
 
       if (!utcString && timezone) {
         const utcDif = DateUtils.getUtcOffset(d1, timezone)
-        utcString = (utcDif === null ? utcString : ((utcDif > -1 ? "+" : "-") + (Math.abs(utcDif) < 9 ? "0" : "") + Math.abs(utcDif) + "00"))
+        const utcDifIntAbs = Math.abs(Math.trunc(utcDif))
+        const utcDifMinutes = (60 * (Math.abs(utcDif) - utcDifIntAbs)).toLocaleString("en-US", { minimumIntegerDigits: 2, useGrouping: false })
+        utcString = (utcDif === null ? utcString : ((utcDif > -1 ? "+" : "-") + (utcDifIntAbs < 10 ? "0" : "") + Math.abs(utcDifIntAbs) + utcDifMinutes))
       }
 
       if (utcString) {
@@ -119,9 +130,11 @@ class DateUtils {
       }
     }
 
-    chrome.storage.local.get("debug", settings => {
-      if (settings.debug) console.log(`Failed to parse ${dateString} ${timeString} ${utcString} ${timezone}`)
-    })
+    if (typeof chrome !== "undefined") {
+      chrome.storage.local.get("debug", settings => {
+        if (settings.debug) console.log(`Failed to parse ${dateString} ${timeString} ${utcString} ${timezone}`)
+      })
+    }
 
     return null
   }
