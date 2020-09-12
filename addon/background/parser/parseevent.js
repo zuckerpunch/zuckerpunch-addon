@@ -19,7 +19,7 @@ class ParseEvent {
       this.processRawEventNode(rawEvent, sourceUrl, documentStorage, settingsStorage)
     })
 
-    ObjUtils.findObjectByPropertyName(json, "upcoming_events").forEach(upcomingEvents => {
+    ObjUtils.findObjectByPropertyName(json, "upcoming_events").concat(ObjUtils.findObjectByPropertyName(json, "upcomingEvents")).forEach(upcomingEvents => {
       if (upcomingEvents.edges) {
         upcomingEvents.edges.forEach(eventContainer => {
           const rawEvent = eventContainer.node
