@@ -22,16 +22,16 @@ class SettingsStorage {
     chrome.storage.local.set({ crowdSourcedHashes: this.localStorageObj.crowdSourcedHashes })
   }
 
-  getTimezoneHint () {
-    return this.localStorageObj.timezoneHint
-  }
+  // getTimezoneHint () {
+  //   return this.localStorageObj.timezoneHint
+  // }
 
-  setTimezoneHint (timezone) {
-    if (timezone !== this.localStorageObj.timezoneHint && timezone) {
-      this.localStorageObj.timezoneHint = timezone
-      chrome.storage.local.set({ timezoneHint: timezone })
-    }
-  }
+  // setTimezoneHint (timezone) {
+  //   if (timezone !== this.localStorageObj.timezoneHint && timezone) {
+  //     this.localStorageObj.timezoneHint = timezone
+  //     chrome.storage.local.set({ timezoneHint: timezone })
+  //   }
+  // }
 
   findTimezoneMap (key) {
     return this.timezoneMap[key]
