@@ -1,6 +1,9 @@
 # Zuckerpunch - events in our hands
 
-Install now on Mozilla Firefox: https://addons.mozilla.org/en-US/firefox/addon/zuckerpunch/
+Install now on 
+- Mozilla Firefox: https://addons.mozilla.org/en-US/firefox/addon/zuckerpunch/
+- Google Chrome: https://chrome.google.com/webstore/detail/zuckerpunch-events-in-our/knckllakmdcialablccceieeldjldcpn
+- Microsoft Edge: https://chrome.google.com/webstore/detail/zuckerpunch-events-in-our/knckllakmdcialablccceieeldjldcpn 
 
 To build and install the Zuckerpunch add-on: 
 - [Build](#how-to-build) 
@@ -27,7 +30,7 @@ The JSON you get will be structured like this:
     "@type": "Event",
     "id": "111111111111111",
     "_hash": -491867146,
-    "name": "The name/title of the event.",
+    "name": "The name of the event.",
     "tags": [
       {
         "tag_id": "333333333333333",
@@ -46,7 +49,9 @@ The JSON you get will be structured like this:
       "latitude": "64.1466238",
       "longitude": "21.9426234"
     },
-    "creator_id": "222222222222222",
+    "creator_ids": [
+      "222222222222222"
+    ],
     "ticket_url": "https://some.host/path",
     "times": [
       {
@@ -154,6 +159,7 @@ You cannot publish the data you collect without prior consent from the entity th
 Using the Zuckerpunch add-on is in breach of Facebook's Terms of Service. If you have accepted these terms, using this add-on COULD get your Facebook account banned, but so far this has never happened.
 
 # versions
-Version 1.0.2: Prepared for Chrome's add-on store (pending).
+Version 1.0.3: Fixes. Parsing relative dates ("tomorrow", "Sunday" etc.). Creator ID now a list.
+Version 1.0.2: Prepared for Chrome's add-on store (passed).
 Version 1.0.1: Prepared for Mozilla's add-on store (passed).
 Version 1.0.0: Works across browsers and fb designs, good data/image sniffing, code refactored and linted.
