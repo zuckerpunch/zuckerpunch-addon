@@ -5,7 +5,6 @@ class DateUtils {
   static getUtcOffset (d, timeZone) {
     const zones = Array.from({ length: 24 }, (_, i) => ({ diff: i - 12 }))
     const actualTime = d.toLocaleString("en-US", { timeZone: timeZone })
-    console.log(actualTime)
     for (var zoneDiff = -12; zoneDiff < 15; zoneDiff++) {
       const d2 = new Date(d)
       d2.setHours(d.getHours() + zoneDiff)

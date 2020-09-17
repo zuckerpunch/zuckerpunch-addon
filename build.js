@@ -1,5 +1,5 @@
 const fs = require("fs-extra")
-const zipFolder = require("zip-folder")
+const zipFolder = require("zip-a-folder")
 const path = require("path")
 const dirSrc = "./addon"
 const dirBuild = "./build"
@@ -62,7 +62,7 @@ function deleteFilesRecursive (directory, deleteWhenInFilename) {
 }
 
 function writeZip (dir, zipPath) {
-  zipFolder(dir, zipPath, (err) => {
+  zipFolder.zipFolder(dir, zipPath, (err) => {
     if (err) {
       console.log("oh no!", err)
     } else {

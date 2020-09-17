@@ -37,8 +37,7 @@ class Queue {
           jsons.push(json)
         } else {
           this.settingsStorage.ifDebugOn(() => {
-            console.log("Queue skipped importing the following since no identifying field names were found:")
-            console.log(jsonLine)
+            console.log("Queue skipped importing the following since no identifying field names were found:", jsonLine)
           })
         }
       } catch (e) {
