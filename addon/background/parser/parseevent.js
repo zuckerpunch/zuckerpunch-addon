@@ -21,9 +21,11 @@ class ParseEvent {
 
     ObjUtils.findObjectByPropertyName(json, "upcoming_events").concat(ObjUtils.findObjectByPropertyName(json, "upcomingEvents")).forEach(upcomingEvents => {
       if (upcomingEvents.edges) {
+        const creatorId = json.data && json.data.page ? json.data.page.id : null
         upcomingEvents.edges.forEach(eventContainer => {
           const rawEvent = eventContainer.node
-          this.processRawEventNode(rawEvent, sourceUrl, documentStorage, settingsStorage)
+          const event = this.processRawEventNode(rawEvent, sourceUrl, documentStorage, settingsStorage)
+          if (creatorId && !event.creator_ids.includes(creatorId)) event.creator_ids.push(creatorId)
         })
       }
     })
@@ -118,7 +120,7 @@ class ParseEvent {
     if (rawEvent.timezone) event.timezone = rawEvent.timezone
     if (rawEvent.tz_display_name && rawEvent.tz_display_name.includes("/")) event.timezone = rawEvent.tz_display_name
 
-    if (rawEvent.event_creator) event.creator_id = rawEvent.event_creator.id
+    if (rawEvent.event_creator && !event.creator_ids.includes(rawEvent.event_creator.id)) event.creator_ids.push(rawEvent.event_creator.id)
     if (rawEvent.coverPhoto && rawEvent.coverPhoto.photo) this.ensureImage(event, "large", rawEvent.coverPhoto.photo.image.url || rawEvent.coverPhoto.photo.image.uri, focus, documentStorage)
     if (rawEvent.childEvents) {
       if (rawEvent.childEvents.count === 0 && rawEvent.startTimestampForDisplay) {
@@ -143,7 +145,7 @@ class ParseEvent {
     if (rawEvent.event_kind === "PUBLIC_TYPE") event.public = true
     if (rawEvent.event_kind === "PRIVATE_TYPE") event.public = false
 
-    if (rawEvent.event_place && rawEvent.event_place.id && !event.creator_id) event.creator_id = rawEvent.event_place.id
+    if (rawEvent.event_place && rawEvent.event_place.id && !event.creator_ids.includes(rawEvent.event_place.id)) event.creator_ids.push(rawEvent.event_place.id)
 
     if (rawEvent.place || rawEvent.event_place) {
       if ((rawEvent.place || rawEvent.event_place).contextual_name) event.location.freeform = (rawEvent.place || rawEvent.event_place).contextual_name
@@ -175,6 +177,8 @@ class ParseEvent {
       const time = this.getTime(event, eventTimeId)
       this.mergeTimes(time, DateUtils.parseDate(rawEvent.startDate))
     }
+
+    return event
   }
 
   resolveTimezoneByLocation (event, settingsStorage) {
