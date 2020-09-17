@@ -23,6 +23,7 @@ class DocumentStorage {
         if (doc.times.length > 1) doc.times = doc.times.filter(t => t.time_id !== doc.id)
         doc.times.sort((a, b) => a.start < b.start ? -1 : (a.start > b.start ? 1 : (a.end < b.end ? 1 : (a.time_id < b.time_id ? 1 : -1))))
       }
+      if (doc.creator_ids) doc.creator_ids.sort()
 
       if ((doc._hash = DocumentStorage.hashCode(doc)) !== _edithash) updated.unshift(doc)
     })
@@ -37,7 +38,7 @@ class DocumentStorage {
   wholesome () {
     return this.docs.filter(d => !(d._draft) &&
     (
-      (d["@type"] === "Event" && (!Object.prototype.hasOwnProperty.call(d, "public") || d.public) && d.name && d.creator_id && d.location) ||
+      (d["@type"] === "Event" && (!Object.prototype.hasOwnProperty.call(d, "public") || d.public) && d.name && d.location) ||
       (d["@type"] === "Creator" && d.name && ((d.email && d.email.length) || (d.website && d.website.length))) ||
       (d["@type"] === "Image")
     ))
@@ -46,7 +47,7 @@ class DocumentStorage {
   getForEdit (type, id) {
     const foundDoc = this.docs.find(d => d.id === id && d["@type"] === type)
     const doc = foundDoc != null ? foundDoc : null ||
-                type === "Event" ? { "@type": "Event", id: id, _hash: null, name: null, tags: [], description: null, location: {}, creator_id: null, ticket_url: null, times: [], timezone: null, images: { large: null } } : null ||
+                type === "Event" ? { "@type": "Event", id: id, _hash: null, name: null, tags: [], description: null, location: {}, creator_ids: [], ticket_url: null, times: [], timezone: null, images: { large: null } } : null ||
                 type === "Creator" ? { "@type": "Creator", id: id, _hash: null, name: null, pagename: null, email: [], website: [], category: [], address: null } : null ||
                 type === "Image" ? { "@type": "Image", id: id, _hash: null, _tmpurl: null } : null
 

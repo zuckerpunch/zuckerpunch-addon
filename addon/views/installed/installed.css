@@ -2,6 +2,7 @@ body {
   background-color: rgb(249,249,250);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: rgb(53, 53, 54);
+  font-size: 100%;
 }
 .container {
   width:49em;
@@ -10,6 +11,14 @@ body {
 h1 {
   margin: 20px 0 0 0;
   font-size: 30px;
+}
+
+.mozilla .chrome_only {
+  display: none;
+}
+
+.chrome .mozilla_only {
+  display: none;
 }
 
 hr {

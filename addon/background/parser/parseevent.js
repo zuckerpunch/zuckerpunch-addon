@@ -19,11 +19,13 @@ class ParseEvent {
       this.processRawEventNode(rawEvent, sourceUrl, documentStorage, settingsStorage)
     })
 
-    ObjUtils.findObjectByPropertyName(json, "upcoming_events").forEach(upcomingEvents => {
+    ObjUtils.findObjectByPropertyName(json, "upcoming_events").concat(ObjUtils.findObjectByPropertyName(json, "upcomingEvents")).forEach(upcomingEvents => {
       if (upcomingEvents.edges) {
+        const creatorId = json.data && json.data.page ? json.data.page.id : null
         upcomingEvents.edges.forEach(eventContainer => {
           const rawEvent = eventContainer.node
-          this.processRawEventNode(rawEvent, sourceUrl, documentStorage, settingsStorage)
+          const event = this.processRawEventNode(rawEvent, sourceUrl, documentStorage, settingsStorage)
+          if (creatorId && !event.creator_ids.includes(creatorId)) event.creator_ids.push(creatorId)
         })
       }
     })
@@ -59,17 +61,18 @@ class ParseEvent {
         const parseddate = DateUtils.parseDate(rawTime.date_text, rawTime.time_text, event.timezone)
         if (parseddate.start > 0) {
           const time = this.getTime(event, rawTime.event_time_id)
-          Object.assign(time, parseddate)
+          this.mergeTimes(time, parseddate)
         }
       })
     })
 
     ObjUtils.CallOnMatch(json, "data.event.child_events.nodes", (childEvents) => {
       const event = documentStorage.getForEdit("Event", json.data.event.id)
+      const utcInfo = json.data.event.tz_display_name
       childEvents.forEach(c => {
         const time = this.getTime(event, c.id)
-        time.start = (new Date(c.utc_start_timestamp * 1000)).toISOString()
-        time.end = (new Date(c.utc_end_timestamp * 1000)).toISOString()
+        time.start = new Date((new Date(c.utc_start_timestamp * 1000)).toUTCString().replace("GMT", utcInfo))
+        time.end = new Date((new Date(c.utc_end_timestamp * 1000)).toUTCString().replace("GMT", utcInfo))
       })
     })
 
@@ -115,18 +118,18 @@ class ParseEvent {
     if (rawEvent.event_description && rawEvent.event_description.text) event.description = rawEvent.event_description.text
     if (rawEvent.details && rawEvent.details.text) event.description = rawEvent.details.text || rawEvent.details
     if (rawEvent.timezone) event.timezone = rawEvent.timezone
-    if (rawEvent.tz_display_name) event.timezone = rawEvent.tz_display_name
+    if (rawEvent.tz_display_name && rawEvent.tz_display_name.includes("/")) event.timezone = rawEvent.tz_display_name
 
-    if (rawEvent.event_creator) event.creator_id = rawEvent.event_creator.id
+    if (rawEvent.event_creator && !event.creator_ids.includes(rawEvent.event_creator.id)) event.creator_ids.push(rawEvent.event_creator.id)
     if (rawEvent.coverPhoto && rawEvent.coverPhoto.photo) this.ensureImage(event, "large", rawEvent.coverPhoto.photo.image.url || rawEvent.coverPhoto.photo.image.uri, focus, documentStorage)
     if (rawEvent.childEvents) {
       if (rawEvent.childEvents.count === 0 && rawEvent.startTimestampForDisplay) {
         const time = this.getTime(event, eventId)
-        Object.assign(time, DateUtils.parseDate(rawEvent.startTimestampForDisplay))
+        this.mergeTimes(time, DateUtils.parseDate(rawEvent.startTimestampForDisplay))
       } else {
         rawEvent.childEvents.edges.forEach(edge => {
           const time = this.getTime(event, edge.node.id)
-          Object.assign(time, DateUtils.parseDate(edge.node.currentStartTimestamp))
+          this.mergeTimes(time, DateUtils.parseDate(edge.node.currentStartTimestamp))
         })
       }
     }
@@ -142,7 +145,7 @@ class ParseEvent {
     if (rawEvent.event_kind === "PUBLIC_TYPE") event.public = true
     if (rawEvent.event_kind === "PRIVATE_TYPE") event.public = false
 
-    if (rawEvent.event_place && rawEvent.event_place.id && !event.creator_id) event.creator_id = rawEvent.event_place.id
+    if (rawEvent.event_place && rawEvent.event_place.id && !event.creator_ids.includes(rawEvent.event_place.id)) event.creator_ids.push(rawEvent.event_place.id)
 
     if (rawEvent.place || rawEvent.event_place) {
       if ((rawEvent.place || rawEvent.event_place).contextual_name) event.location.freeform = (rawEvent.place || rawEvent.event_place).contextual_name
@@ -168,12 +171,14 @@ class ParseEvent {
     this.resolveTimezoneByLocation(event, settingsStorage)
     if (rawEvent.day_time_sentence) {
       const time = this.getTime(event, eventTimeId)
-      if (!time.start) Object.assign(time, DateUtils.parseDate(rawEvent.day_time_sentence, "", event.timezone || settingsStorage.getTimezoneHint()))
+      this.mergeTimes(time, DateUtils.parseDate(rawEvent.day_time_sentence, "", event.timezone))
     }
     if (eventTimeId && rawEvent.startDate) {
       const time = this.getTime(event, eventTimeId)
-      Object.assign(time, DateUtils.parseDate(rawEvent.startDate))
+      this.mergeTimes(time, DateUtils.parseDate(rawEvent.startDate))
     }
+
+    return event
   }
 
   resolveTimezoneByLocation (event, settingsStorage) {
@@ -209,5 +214,13 @@ class ParseEvent {
     tag.type = type
     tag.text = text
     tag.text_locale = textLocale || tag.text_locale
+  }
+
+  mergeTimes (a, b) {
+    // the following if is kept around for qa
+    if ((a.start && b.start && a.start.getTime() !== b.start.getTime()) || (a.end && b.end && a.end.getTime() !== b.end.getTime())) console.error("Picked up inconsistent dates for the same event", a, b)
+
+    if (!a.start) a.start = b.start
+    if (!a.end) a.end = b.end
   }
 }

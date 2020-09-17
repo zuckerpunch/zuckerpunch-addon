@@ -1,7 +1,7 @@
 {
   "name": "Zuckerpunch - events in our hands",
-  "description": "Convert Facebook events into JSON and crowdsource it, simply by browsing as usual. The JSON is available to you via the toolbar, and, with the permission of the event organizers, we make it publicly available to everyone. Give the Zuck a punch ❤️",
-  "version": "1.0.1",
+  "description": "Convert Facebook events into JSON and crowdsource it, simply by browsing. JSON available via the toolbar. Give the Zuck a punch ❤️",
+  "version": "1.0.3",
   "permissions": [
     "https://*.facebook.com/*",
     "https://*.fbcdn.net/*",

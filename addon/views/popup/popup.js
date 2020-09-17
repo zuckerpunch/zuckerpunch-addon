@@ -42,8 +42,12 @@ document.addEventListener("click", (e) => {
     copyToClipboard()
   }
   if (e.target.id === "privacypolicylink") {
-    const ppurl = browser.runtime.getURL("views/installed/installed.html")
+    const ppurl = typeof browser !== "undefined" ? browser.runtime.getURL("views/installed/installed.html") : chrome.runtime.getURL("views/installed/installed.html")
     document.location = ppurl
+  }
+  if (e.target.id === "venuelistlink") {
+    const googleSearch = "https://www.google.com/search?q=site%3Afacebook.com+inurl%3A%2Fevents%2F"
+    chrome.tabs.create({ url: googleSearch })
   }
 })
 

@@ -6,7 +6,11 @@ const dirBuild = "./build"
 const dirMozilla = dirBuild + "/mozilla"
 const dirChrome = dirBuild + "/chrome"
 
-fs.copySync("node_modules/dompurify/dist/purify.min.js", "addon/utils/purify.min.js")
+if (!fs.existsSync("addon/utils/purify.min.js")) {
+  var purifyJs = fs.readFileSync("node_modules/dompurify/dist/purify.min.js", "UTF-8")
+  purifyJs = purifyJs.replace("sourceMappingURL=purify.min.js.map", "") // sourcemap yield crappy log errors when addblock is installed
+  fs.writeFileSync("addon/utils/purify.min.js", purifyJs)
+}
 
 console.log("building to " + dirBuild)
 
@@ -25,8 +29,11 @@ fs.ensureDir(dirBuild).then(() => {
 
   fs.ensureDir(dirChrome).then(() => {
     fs.copy(dirSrc, dirChrome).then(() => {
-      fs.move(dirChrome + "/manifest_chrome.json", dirChrome + "/manifest.json")
-      deleteFilesRecursive(dirChrome, "mozilla")
+      fs.move(dirChrome + "/manifest_chrome.json", dirChrome + "/manifest.json").then(() => {
+        deleteFilesRecursive(dirChrome, "mozilla").then(() => {
+          writeZip(dirChrome, dirBuild + "/chrome.zip")
+        })
+      })
     })
   })
 })
@@ -59,7 +66,7 @@ function writeZip (dir, zipPath) {
     if (err) {
       console.log("oh no!", err)
     } else {
-      console.log("EXCELLENT - ZIPPED")
+      console.log(zipPath + " ready")
     }
   })
 };

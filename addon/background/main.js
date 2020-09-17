@@ -8,7 +8,7 @@ const _settingsStorage = new SettingsStorage()
 const _parser = new Parser([
   new ParseEvent(),
   new ParseCreator(),
-  new ParseTimezone(),
+  //  new ParseTimezone(),
   new ParseImage(),
   new ParseTimePopup()
 ], _documentStorage, _blobStorage, _settingsStorage)
