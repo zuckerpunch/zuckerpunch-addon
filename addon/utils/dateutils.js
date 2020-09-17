@@ -61,7 +61,7 @@ class DateUtils {
             time.end = DateUtils.intlDateParse(endDateString, hourMatches[1], utcString, timezone)
             if (time.end == null) time.end = DateUtils.intlDateParse(startDateString, hourMatches[1], utcString, timezone)
           }
-          if (time.end < time.start) time.end = new Date(time.end.getTime() + 60 * 60 * 24 * 1000)
+          if (time.end < time.start) time.end = new Date(time.end.getTime() + 24 * 60 * 60 * 1000)
         }
       }
     }
@@ -95,7 +95,7 @@ class DateUtils {
       "November   Nov       11月    noviembre  novembre    November    novembro    листопада   ноября     november    november  NOV.        november    listopada     בנובמבר   नवंबर       ",
       "December   Dec       12月    diciembre  décembre    Dezember    dezembro    грудня      декабря    december    december  DEC.        desember    grudnia       בדצמבר    दिसंबर      "]
 
-    let m = null
+    let m, y, d
     for (var monthIdx = 11; monthIdx > -1 && !m; monthIdx--) {
       const matches = monthMap[monthIdx].split(/\s+/g).filter(n => n.length > 0)
       matches.forEach((match) => {
@@ -106,8 +106,41 @@ class DateUtils {
       })
     }
 
-    const y = (dateString.match(/20\d\d/g) || [new Date().getFullYear()])[0]
-    const d = (dateString.replace(y, "").match(/\d+/g).filter(s => s.length < 3) || [null])[0]
+    if (m) {
+      y = (dateString.match(/20\d\d/g) || [new Date().getFullYear()])[0]
+      d = (dateString.replace(y, "").match(/\d+/g).filter(s => s.length < 3) || [null])[0]
+    } else {
+      const relativeMap = [
+      // en         cn        jp       es        fr          de          pt        uk          ru          sv          da/nb       pl            he         hi
+        "Sunday     星期日    日曜日    domingo   Dimanche    Sonntag     domingo   Неділя      Воскресенье Söndag      Søndag      niedziela     יוֹם-רִאשׁוֹן रविवार",
+        "Monday     星期一    月曜      lunes     Lundi       Montag      segunda   Понеділок   понедельник Måndag      Mandag      poniedziałek  יוֹם_שֵׁנִי   सोमवार",
+        "Tuesday    星期二    火曜日    martes    Mardi       Dienstag    terça     Вівторок    вторник     Tisdag      Tirsdag     wtorek        יוֹם_שְׁלִישִׁי मंगलवार",
+        "Wednesday  星期三    水曜日    miércoles Mercredi    Mittwoch    quarta    Середа      Среда       Onsdag      Onsdag      środa         יום_רביעי बुधवार",
+        "Thursday   星期四    木曜日    jueves    Jeudi       Donnerstag  quinta    Четвер      Четверг     Torsdag     Torsdag     czwartek      יוֹם_חֲמִישִׁי गुरूवार",
+        "Friday     星期五    金曜日    viernes   Vendredi    Freitag     sexta     П’ятниця    Пятница     Fredag      Fredag      piątek        יוֹם_שִׁישִׁי  शुक्रवार",
+        "Saturday   星期六    土曜日    sábado    Samedi      Samstag     sábado    Субота      суббота     ​​Lördag      Lørdag      sobota        יום_שבת   शनिवार",
+        "Today      今天      今日      HOY       Aujourd’hui Heute       Hoje      Сьогодні    Сегодня     Idag        I_dag       Dzisiaj       היום      आज",
+        "Tomorrow   明天      明日      MAÑANA    Demain      Morgen      Amanhã    Завтра      Завтра      Imorgon     I_morgen    Jutro         מחר       कल"
+      ]
+
+      let daysFromNow = null
+      for (let i = 0; i < 9; i++) {
+        if (dateString.match(new RegExp("(\\W|^)(" + relativeMap[i].replace(/\s+/g, "|").replace(/_/g, " ") + ")(\\W|$)", "i"))) {
+          if (i > 6) {
+            daysFromNow = i - 7
+          } else {
+            daysFromNow = (i - (new Date()).getDay() + 7) % 7
+          }
+        }
+        if (daysFromNow !== null) break
+      }
+      if (daysFromNow !== null && daysFromNow < 6) {
+        const matchDate = new Date(new Date().getTime() + daysFromNow * 24 * 60 * 60 * 1000)
+        d = matchDate.getDate()
+        m = matchDate.getMonth() + 1
+        y = matchDate.getFullYear()
+      }
+    }
 
     if (m && d && y) {
       const dateVariantA = `${y}-${(m > 9 ? m : "0" + m)}-${(d > 9 ? d : "0" + d)}T${timeString.replace(".", ":")}`
