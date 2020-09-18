@@ -9,13 +9,12 @@ class CrowdSourcer {
   }
 
   publishNew () {
-    const wholesomNew = this.documentStorage.wholesome().filter(doc => !this.settingsStorage.getCrowdSourcedHashes().includes(doc._hash))
+    chrome.storage.local.get(["privacypolicyaccept", "endpoint_type", "endpoint", "puncher_id"], settings => {
+      if (!settings.privacypolicyaccept) { return }
 
-    if (wholesomNew.length > 0) {
-      this.settingsStorage.appendCrowdSourcedHashes(wholesomNew.map(doc => doc._hash))
-
-      chrome.storage.local.get(null, settings => {
-        if (!settings.privacypolicyaccept) { return }
+      const wholesomNew = this.documentStorage.wholesome().filter(doc => !this.settingsStorage.getCrowdSourcedHashes().includes(doc._hash))
+      if (wholesomNew.length > 0) {
+        this.settingsStorage.appendCrowdSourcedHashes(wholesomNew.map(doc => doc._hash))
 
         if (settings.endpoint_type === "upsert") {
           wholesomNew.forEach(e => {
@@ -72,7 +71,7 @@ class CrowdSourcer {
           }
           xhr.send(JSON.stringify(wholesomNew.map(e => { return { "@type": e["@type"], id: e.id, _hash: e._hash } })))
         }
-      })
-    }
+      }
+    })
   }
 }
