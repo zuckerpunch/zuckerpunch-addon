@@ -1,3 +1,4 @@
+/* global browser chrome */
 "use strict"
 
 class App {
@@ -11,6 +12,7 @@ class App {
     App.crowdSourcer = crowdSourcer
     App.lastQueueChange = Date.now()
     App.lastCrowdSourcing = Date.now()
+    App.host = typeof browser === "undefined" ? chrome : browser
   }
 
   static parseQueue () {
@@ -19,6 +21,9 @@ class App {
       App.lastQueueChange = Date.now()
     })
     App.documentStorage.hashDirty()
+
+    const eventCount = App.documentStorage.wholesome().filter(d => d["@type"] === "Event").length
+    if (eventCount > 0) App.host.browserAction.setBadgeText({ text: eventCount.toString() })
   }
 
   static crowdSource () {
@@ -31,6 +36,8 @@ class App {
   }
 
   start () {
+    App.host.browserAction.setBadgeBackgroundColor({ color: "#4448" })
+
     // main parse / publish pump:
     setInterval(() => {
       App.parseQueue()
