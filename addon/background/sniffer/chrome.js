@@ -75,7 +75,7 @@ class Sniffer {
   }
 
   static launchDebugDetacher (tabId) {
-    const secondsToWait = 600
+    const secondsToWait = 60
     const activity = Sniffer.tabDebugActivity.find(e => e.tabId === tabId)
     const msToDetach = Math.max(secondsToWait * 1000 + activity.lastActive - Date.now(), 2500 + activity.created - Date.now())
 
@@ -83,11 +83,9 @@ class Sniffer {
       window.setTimeout(() => Sniffer.launchDebugDetacher(tabId), msToDetach)
     } else {
       Sniffer.settingsStorage.ifDebugOn(() => console.log("Detaching debugger for tabId " + tabId))
-      try {
-        chrome.debugger.detach({ tabId: tabId })
-      } catch (e) {
-        console.log("Debugger could not be detached on tab:" + e.message)
-      }
+      chrome.tabs.get(tabId, () => {
+        if (!chrome.runtime.lastError) chrome.debugger.detach({ tabId: tabId })
+      })
       Sniffer.tabDebugActivity.splice(Sniffer.tabDebugActivity.indexOf(activity), 1)
     }
   }
