@@ -36,7 +36,7 @@ class App {
   }
 
   start () {
-    App.host.browserAction.setBadgeBackgroundColor({ color: "#4448" })
+    App.host.browserAction.setBadgeBackgroundColor({ color: "#555F" })
 
     // main parse / publish pump:
     setInterval(() => {

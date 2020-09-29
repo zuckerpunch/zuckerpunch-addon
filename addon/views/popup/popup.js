@@ -16,6 +16,10 @@ function handleResponse (response) {
     document.body.className = jsonParsed.length > 0 ? "json_set" : "json_empty"
   }
 
+  document.getElementById("eventCounter").innerText = response.counters.Event
+  document.getElementById("creatorCounter").innerText = response.counters.Creator
+  document.getElementById("imageCounter").innerText = response.counters.Image
+
   chrome.storage.local.get("debug", debugSettings => {
     if (debugSettings.debug) {
       const debugJson = document.querySelector("#debug_json")

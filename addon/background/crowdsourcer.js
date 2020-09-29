@@ -26,6 +26,8 @@ class CrowdSourcer {
         }
 
         if (settings.endpoint_type === "zuckerpunch") {
+          wholesomNew.map(e => this.settingsStorage.updateCrowdsourcedCounter(e["@type"], e.id))
+
           var xhr = new XMLHttpRequest()
           xhr.open("POST", settings.endpoint + "/scout", true)
           xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8")
@@ -36,15 +38,16 @@ class CrowdSourcer {
               novelties.forEach(novel => {
                 const doc = wholesomNew.find(d => d.id === novel.id && d._hash === novel._hash)
                 if (doc) {
-                  var xhr = new XMLHttpRequest()
-                  xhr.open("POST", settings.endpoint + "/submit", true)
-                  xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8")
-                  xhr.setRequestHeader("puncher", settings.puncher_id)
-                  xhr.setRequestHeader("submit-ticket", novel.ticket)
-                  xhr.send(JSON.stringify(doc, null, 2))
+                  var blob = doc["@type"] === "Image" && doc._tmpurl ? this.blobStorage.getBlob(doc._tmpurl) : null
 
-                  if (doc["@type"] === "Image" && doc._tmpurl) {
-                    const blob = this.blobStorage.getBlob(doc._tmpurl)
+                  if (blob || doc["@type"] !== "Image") {
+                    var xhr = new XMLHttpRequest()
+                    xhr.open("POST", settings.endpoint + "/submit", true)
+                    xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8")
+                    xhr.setRequestHeader("puncher", settings.puncher_id)
+                    xhr.setRequestHeader("submit-ticket", novel.ticket)
+                    xhr.send(JSON.stringify(doc, null, 2))
+
                     if (blob) {
                       const formData = new FormData()
                       formData.append("file", blob)

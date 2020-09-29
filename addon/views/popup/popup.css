@@ -60,6 +60,11 @@ html, body {
   vertical-align: bottom;
 }
 
+#crowdsource_counter {
+  text-align: center;
+  padding-right:15px;
+}
+
 #copy_to_clipboard {
   font-weight: bold;
   font-size: 21px;
