@@ -7,6 +7,8 @@ class SettingsStorage {
     this.ON_MAX_REDUCE = 100
     this.localStorageObj = {}
     this.timezoneMap = {}
+    this.crowdsourcedCounter = { Event: 0, Creator: 0, Image: 0 }
+    this.countedIds = []
     this.ensureLocalStorage()
     this.loadFromLocalStorage()
   }
@@ -22,16 +24,17 @@ class SettingsStorage {
     chrome.storage.local.set({ crowdSourcedHashes: this.localStorageObj.crowdSourcedHashes })
   }
 
-  // getTimezoneHint () {
-  //   return this.localStorageObj.timezoneHint
-  // }
+  getCrowdsourcedCounter () {
+    return this.crowdsourcedCounter
+  }
 
-  // setTimezoneHint (timezone) {
-  //   if (timezone !== this.localStorageObj.timezoneHint && timezone) {
-  //     this.localStorageObj.timezoneHint = timezone
-  //     chrome.storage.local.set({ timezoneHint: timezone })
-  //   }
-  // }
+  updateCrowdsourcedCounter (type, id) {
+    if (!this.countedIds.includes(id)) {
+      this.countedIds.push(id)
+      this.crowdsourcedCounter[type] = this.crowdsourcedCounter[type] + 1
+      chrome.storage.local.set({ crowdsourcedCounter: JSON.stringify(this.crowdsourcedCounter) })
+    }
+  }
 
   findTimezoneMap (key) {
     return this.timezoneMap[key]
@@ -67,6 +70,7 @@ class SettingsStorage {
       this.localStorageObj = storage
       if (!this.localStorageObj.crowdSourcedHashes) this.localStorageObj.crowdSourcedHashes = []
       if (storage.timezoneMap) this.timezoneMap = JSON.parse(storage.timezoneMap)
+      if (storage.crowdsourcedCounter) this.crowdsourcedCounter = JSON.parse(storage.crowdsourcedCounter)
     })
   }
 

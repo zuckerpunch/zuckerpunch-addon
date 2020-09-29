@@ -159,7 +159,8 @@ You cannot publish the data you collect without prior consent from the entity th
 Using the Zuckerpunch add-on is in breach of Facebook's Terms of Service. If you have accepted these terms, using this add-on COULD get your Facebook account banned, but so far this has never happened.
 
 # versions
-Version 1.0.3: Fixes. Parsing relative dates ("tomorrow", "Sunday" etc.). Creator ID now a list.
-Version 1.0.2: Prepared for Chrome's add-on store (passed).
-Version 1.0.1: Prepared for Mozilla's add-on store (passed).
-Version 1.0.0: Works across browsers and fb designs, good data/image sniffing, code refactored and linted.
+- 1.0.4: Adding counters to icon (number of events in popup) and popup (number of crowdsourced docs to date)
+- 1.0.3: Fixes. Parsing relative dates ("tomorrow", "Sunday" etc.). Creator ID now a list.
+- 1.0.2: Prepared for Chrome's add-on store (passed).
+- 1.0.1: Prepared for Mozilla's add-on store (passed).
+- 1.0.0: Works across browsers and fb designs, good data/image sniffing, code refactored and linted.

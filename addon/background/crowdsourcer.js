@@ -9,13 +9,12 @@ class CrowdSourcer {
   }
 
   publishNew () {
-    const wholesomNew = this.documentStorage.wholesome().filter(doc => !this.settingsStorage.getCrowdSourcedHashes().includes(doc._hash))
+    chrome.storage.local.get(["privacypolicyaccept", "endpoint_type", "endpoint", "puncher_id"], settings => {
+      if (!settings.privacypolicyaccept) { return }
 
-    if (wholesomNew.length > 0) {
-      this.settingsStorage.appendCrowdSourcedHashes(wholesomNew.map(doc => doc._hash))
-
-      chrome.storage.local.get(null, settings => {
-        if (!settings.privacypolicyaccept) { return }
+      const wholesomNew = this.documentStorage.wholesome().filter(doc => !this.settingsStorage.getCrowdSourcedHashes().includes(doc._hash))
+      if (wholesomNew.length > 0) {
+        this.settingsStorage.appendCrowdSourcedHashes(wholesomNew.map(doc => doc._hash))
 
         if (settings.endpoint_type === "upsert") {
           wholesomNew.forEach(e => {
@@ -27,6 +26,8 @@ class CrowdSourcer {
         }
 
         if (settings.endpoint_type === "zuckerpunch") {
+          wholesomNew.map(e => this.settingsStorage.updateCrowdsourcedCounter(e["@type"], e.id))
+
           var xhr = new XMLHttpRequest()
           xhr.open("POST", settings.endpoint + "/scout", true)
           xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8")
@@ -37,15 +38,16 @@ class CrowdSourcer {
               novelties.forEach(novel => {
                 const doc = wholesomNew.find(d => d.id === novel.id && d._hash === novel._hash)
                 if (doc) {
-                  var xhr = new XMLHttpRequest()
-                  xhr.open("POST", settings.endpoint + "/submit", true)
-                  xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8")
-                  xhr.setRequestHeader("puncher", settings.puncher_id)
-                  xhr.setRequestHeader("submit-ticket", novel.ticket)
-                  xhr.send(JSON.stringify(doc, null, 2))
+                  var blob = doc["@type"] === "Image" && doc._tmpurl ? this.blobStorage.getBlob(doc._tmpurl) : null
 
-                  if (doc["@type"] === "Image" && doc._tmpurl) {
-                    const blob = this.blobStorage.getBlob(doc._tmpurl)
+                  if (blob || doc["@type"] !== "Image") {
+                    var xhr = new XMLHttpRequest()
+                    xhr.open("POST", settings.endpoint + "/submit", true)
+                    xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8")
+                    xhr.setRequestHeader("puncher", settings.puncher_id)
+                    xhr.setRequestHeader("submit-ticket", novel.ticket)
+                    xhr.send(JSON.stringify(doc, null, 2))
+
                     if (blob) {
                       const formData = new FormData()
                       formData.append("file", blob)
@@ -72,7 +74,7 @@ class CrowdSourcer {
           }
           xhr.send(JSON.stringify(wholesomNew.map(e => { return { "@type": e["@type"], id: e.id, _hash: e._hash } })))
         }
-      })
-    }
+      }
+    })
   }
 }

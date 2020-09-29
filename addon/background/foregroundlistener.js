@@ -2,10 +2,11 @@
 "use strict"
 
 class ForegroundListener {
-  constructor (queue, documentStorage, parseQueueFunc) {
+  constructor (queue, documentStorage, parseQueueFunc, settingsStorage) {
     ForegroundListener.queue = queue
     ForegroundListener.documentStorage = documentStorage
     ForegroundListener.parseQueueFunc = parseQueueFunc
+    ForegroundListener.settingsStorage = settingsStorage
   }
 
   static contentScriptMessageListener (foregroundMessage, sender, sendResponse) {
@@ -17,6 +18,7 @@ class ForegroundListener {
       ForegroundListener.parseQueueFunc()
       sendResponse({
         response: JSON.stringify(ForegroundListener.documentStorage.wholesome(), null, 2),
+        counters: ForegroundListener.settingsStorage.getCrowdsourcedCounter(),
         debug: JSON.stringify(ForegroundListener.queue.get(), null, 2)
       })
     }
