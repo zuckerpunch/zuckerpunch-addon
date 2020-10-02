@@ -159,8 +159,9 @@ You cannot publish the data you collect without prior consent from the entity th
 Using the Zuckerpunch add-on is in breach of Facebook's Terms of Service. If you have accepted these terms, using this add-on COULD get your Facebook account banned, but so far this has never happened.
 
 # versions
-- 1.0.5: NPM package DOMPurify upgraded to 2.1.1 (security update)
-- 1.0.4: Adding counters to icon (number of events in popup) and popup (number of crowdsourced docs to date)
+- 1.0.6: Calling new serverless backend for crowdsourcing, using https.
+- 1.0.5: NPM package DOMPurify upgraded to 2.1.1 (security update).
+- 1.0.4: Adding counters to icon (number of events in popup) and popup (number of crowdsourced docs to date).
 - 1.0.3: Fixes. Parsing relative dates ("tomorrow", "Sunday" etc.). Creator ID now a list.
 - 1.0.2: Prepared for Chrome's add-on store (passed).
 - 1.0.1: Prepared for Mozilla's add-on store (passed).

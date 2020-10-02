@@ -1,7 +1,7 @@
 {
   "name": "Zuckerpunch - events in our hands",
   "description": "Crowdsource public Facebook events you browse to our OPEN event database. Give venues better exposure (we ask their permission before we publish) and give the Zuck a punch ❤️",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "developer": {
     "name": "zuckerpunch",
     "url": "https://github.com/zuckerpunch"
