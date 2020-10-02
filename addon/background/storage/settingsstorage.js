@@ -76,10 +76,12 @@ class SettingsStorage {
 
   ensureLocalStorage () {
     chrome.storage.local.get(null, function (storageResult) {
-      if (!storageResult.puncher_id) {
+      const oldEndpoint = "http://zuckerpunch-app.northeurope.azurecontainer.io:3000/event" // for upgrading v1.0 - 1.05 to new backend
+
+      if (!storageResult.puncher_id || storageResult.endpoint === oldEndpoint) {
         chrome.storage.local.set({
           puncher_id: (Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)),
-          endpoint: "http://zuckerpunch-app.northeurope.azurecontainer.io:3000/event",
+          endpoint: "https://zuckerpunch-services.azurewebsites.net/api",
           endpoint_type: "zuckerpunch"
         })
       }
