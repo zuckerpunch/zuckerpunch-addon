@@ -24,10 +24,10 @@ class Sniffer {
 
   static onBeforeRequest (requestDetails) {
     chrome.tabs.get(requestDetails.tabId, (tab) => {
-      const isEventRelated = requestDetails.url.includes("/events") || requestDetails.url.includes("/about")
-
+      const url = tab.pendingUrl || tab.url || requestDetails.url
+      const isEventRelated = url.startsWith("https") && (url.includes("/events") || url.includes("/about"))
       if (isEventRelated) {
-        Sniffer.attachDebugger(requestDetails.tabId, requestDetails.url)
+        Sniffer.attachDebugger(requestDetails.tabId, url)
       }
     })
   }
@@ -83,10 +83,10 @@ class Sniffer {
       window.setTimeout(() => Sniffer.launchDebugDetacher(tabId), msToDetach)
     } else {
       Sniffer.settingsStorage.ifDebugOn(() => console.log("Detaching debugger for tabId " + tabId))
+      Sniffer.tabDebugActivity.splice(Sniffer.tabDebugActivity.indexOf(activity), 1)
       chrome.tabs.get(tabId, () => {
         if (!chrome.runtime.lastError) chrome.debugger.detach({ tabId: tabId })
       })
-      Sniffer.tabDebugActivity.splice(Sniffer.tabDebugActivity.indexOf(activity), 1)
     }
   }
 

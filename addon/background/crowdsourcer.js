@@ -14,8 +14,6 @@ class CrowdSourcer {
 
       const wholesomNew = this.documentStorage.wholesome().filter(doc => !this.settingsStorage.getCrowdSourcedHashes().includes(doc._hash))
       if (wholesomNew.length > 0) {
-        this.settingsStorage.appendCrowdSourcedHashes(wholesomNew.map(doc => doc._hash))
-
         if (settings.endpoint_type === "upsert") {
           wholesomNew.forEach(e => {
             var xhr = new XMLHttpRequest()
@@ -34,6 +32,7 @@ class CrowdSourcer {
           xhr.setRequestHeader("puncher", settings.puncher_id)
           xhr.onload = () => {
             try {
+              this.settingsStorage.appendCrowdSourcedHashes(wholesomNew.map(doc => doc._hash))
               const novelties = JSON.parse(xhr.response)
               novelties.forEach(novel => {
                 const doc = wholesomNew.find(d => d.id === novel.id && d._hash === novel._hash)
