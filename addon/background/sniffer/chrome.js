@@ -8,7 +8,7 @@ class Sniffer {
     Sniffer.tabDebugActivity = []
   }
 
-  static attachDebugger (tabId, url) {
+  static attachDebugger (tabId) {
     const active = Sniffer.tabDebugActivity.find(e => e.tabId === tabId)
 
     if (active) {
@@ -16,10 +16,16 @@ class Sniffer {
       return
     }
 
-    Sniffer.tabDebugActivity.push({ tabId: tabId, created: Date.now(), lastActive: Date.now(), invokerUrl: url, contentRequests: [] })
-    chrome.debugger.attach({ tabId: tabId }, "1.3", () => chrome.debugger.sendCommand({ tabId: tabId }, "Network.enable"))
     Sniffer.settingsStorage.ifDebugOn(() => console.log("Ataching debugger for tabId " + tabId))
-    Sniffer.launchDebugDetacher(tabId)
+    chrome.debugger.attach({ tabId: tabId }, "1.3", () => {
+      if (!chrome.runtime.lastError) {
+        Sniffer.tabDebugActivity.push({ tabId: tabId, created: Date.now(), lastActive: Date.now(), contentRequests: [] })
+        chrome.debugger.sendCommand({ tabId: tabId }, "Network.enable")
+        Sniffer.launchDebugDetacher(tabId)
+      } else {
+        window.setTimeout(() => this.attachDebugger(tabId), 25)
+      }
+    })
   }
 
   static onBeforeRequest (requestDetails) {
@@ -39,7 +45,7 @@ class Sniffer {
 
     switch (message) {
       case "Network.requestWillBeSent":
-        if (active && params.request.url !== active.invokerUrl && ["graphql", "events", "dates"].some(s => params.request.url.includes(s))) {
+        if (active && ["graphql", "events", "dates"].some(s => params.request.url.includes(s))) {
           active.contentRequests.push({ requestId: params.requestId, postData: params.request.postData, url: params.request.url, referer: params.documentURL })
         }
         break
@@ -84,14 +90,21 @@ class Sniffer {
     } else {
       Sniffer.settingsStorage.ifDebugOn(() => console.log("Detaching debugger for tabId " + tabId))
       Sniffer.tabDebugActivity.splice(Sniffer.tabDebugActivity.indexOf(activity), 1)
-      chrome.tabs.get(tabId, () => {
-        if (!chrome.runtime.lastError) chrome.debugger.detach({ tabId: tabId })
+      chrome.debugger.detach({ tabId: tabId }, () => {
+        const reddit = chrome.runtime.lastError
       })
     }
   }
 
   start () {
     chrome.debugger.onEvent.addListener(Sniffer.allEventHandler)
-    chrome.webRequest.onBeforeRequest.addListener(Sniffer.onBeforeRequest, { urls: ["https://*.facebook.com/*events*"] }, ["blocking", "requestBody"])
+    chrome.webRequest.onBeforeRequest.addListener(Sniffer.onBeforeRequest,
+      {
+        urls: [
+          "https://*.facebook.com/events/*",
+          "https://*.facebook.com/*/events/*",
+          "https://*.facebook.com/*/about/*"]
+      }, ["blocking", "requestBody"]
+    )
   }
 }
