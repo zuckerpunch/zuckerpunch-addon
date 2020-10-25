@@ -33,7 +33,7 @@ class Sniffer {
       const url = tab.pendingUrl || tab.url || requestDetails.url
       const isEventRelated = url.startsWith("https") && (url.includes("/events") || url.includes("/about"))
       if (isEventRelated) {
-        Sniffer.attachDebugger(requestDetails.tabId, url)
+        Sniffer.attachDebugger(requestDetails.tabId)
       }
     })
   }
