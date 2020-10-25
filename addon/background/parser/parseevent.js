@@ -136,9 +136,13 @@ class ParseEvent {
 
     if (rawEvent.discovery_categories) {
       rawEvent.discovery_categories.forEach(rawCategory => {
-        const tagLinkParams = (new URL(rawCategory.uri)).searchParams
-        const tagToken = JSON.parse(tagLinkParams.get("suggestion_token"))
-        this.ensureTag(event, tagToken.event_categories[0].toString(), "category", rawCategory.label, null)
+        try {
+          const tagLinkParams = (new URL(rawCategory.uri)).searchParams
+          const tagToken = JSON.parse(tagLinkParams.get("suggestion_token"))
+          this.ensureTag(event, tagToken.event_categories[0].toString(), "category", rawCategory.label, null)
+        } catch {
+          settingsStorage.ifDebugOn(() => console.warn(`Failed to parse category URI ${rawCategory.uri}`))
+        }
       })
     }
 
