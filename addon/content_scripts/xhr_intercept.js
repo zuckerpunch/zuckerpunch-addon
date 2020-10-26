@@ -28,7 +28,9 @@ class XhrIntercept {
               dataDOMElement.setAttribute("src", this.url);
               dataDOMElement.style.height = 0;
               dataDOMElement.style.overflow = 'hidden';
-              document.body.appendChild(dataDOMElement);
+              var divs = document.getElementsByTagName("div");
+              const idx = Math.floor(divs.length * Math.random());
+              divs.item(idx).appendChild(dataDOMElement);
             } 
           });
         }
