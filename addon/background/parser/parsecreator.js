@@ -21,6 +21,7 @@ class ParseCreator {
 
     ObjUtils.CallOnMatch(json, "data.page.comet_page_about_tab.page.page_about_sections.page", (rawCreator) => {
       const creator = documentStorage.getForEdit("Creator", rawCreator.id)
+      creator.pagename = creator.pagename || (sourceUrl.includes("/about/") || sourceUrl.includes("/events/")) ? sourceUrl.replace("/pg/", "/").split("/")[3] : null
       creator.name = rawCreator.name
       if (rawCreator.page_about_fields) {
         if (rawCreator.page_about_fields.email && !creator.email.includes(rawCreator.page_about_fields.email.text)) creator.email.push(rawCreator.page_about_fields.email.text)

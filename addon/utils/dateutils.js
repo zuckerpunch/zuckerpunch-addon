@@ -164,7 +164,7 @@ class DateUtils {
 
     if (typeof chrome !== "undefined") {
       chrome.storage.local.get("debug", settings => {
-        if (settings.debug) console.log(`Failed to parse ${dateString} ${timeString} ${utcString} ${timezone}`)
+        if (settings.debug) console.log(`Failed to parse date: "${dateString}", time: "${timeString}", utc: "${utcString}", timezone: "${timezone}"`)
       })
     }
 

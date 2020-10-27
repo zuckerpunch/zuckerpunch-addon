@@ -55,6 +55,15 @@ document.addEventListener("click", (e) => {
   }
 })
 
+document.getElementById("search").onkeyup = (event) => {
+  const searchTerm = event.target.value.toLowerCase()
+  const copyHelper = document.getElementById("copy_helper")
+  const docs = JSON.parse(copyHelper.value)
+  const filtered = docs.filter(doc => Object.getOwnPropertyNames(doc).some((prop) => doc[prop] && (doc[prop].toString().toLowerCase().indexOf(searchTerm) > -1)))
+  jsonViewer.showJSON(filtered, -1, 2)
+  document.getElementById("search_label").style.display = searchTerm ? "none" : ""
+}
+
 var jsonViewer = new JSONViewer()
 document.querySelector("#json").appendChild(jsonViewer.getContainer())
 

@@ -76,6 +76,31 @@ html, body {
 
 #copy_helper { position: absolute; z-index: -10000; opacity: 0; }
 
+.json_empty .search-box {
+  display: none;
+}
+
+.search-box label {
+  position: absolute;
+  font-size: 1.4rem;
+  width: 90%;
+  text-align: center;
+  margin-top: 14px;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.search-box input {
+  width: 89%;
+  border-radius: 8px;
+  border-color: #ddd;
+  padding: 6px 10px;
+  margin-top: 10px;
+  font-size: 1.3rem;
+  outline: none !important;
+  box-shadow: none;
+}
+
 #debug_json {
   width: 95%;
   height:10em;
@@ -96,7 +121,7 @@ h1 {
   background: #2fc974;
   color: #fff;
   display: block;
-  padding: 20px 10px;
+  padding: 12px 10px;
   text-align: center;
   text-decoration: none;
   width: 90%;
