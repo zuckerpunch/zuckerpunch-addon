@@ -119,9 +119,7 @@ class ParseEvent {
     if (rawEvent.details && rawEvent.details.text) event.description = rawEvent.details.text || rawEvent.details
     if (rawEvent.timezone) event.timezone = rawEvent.timezone
     if (rawEvent.tz_display_name && rawEvent.tz_display_name.includes("/")) event.timezone = rawEvent.tz_display_name
-
     if (rawEvent.event_creator && !event.creator_ids.includes(rawEvent.event_creator.id)) event.creator_ids.push(rawEvent.event_creator.id)
-    if (rawEvent.coverPhoto && rawEvent.coverPhoto.photo) this.ensureImage(event, "large", rawEvent.coverPhoto.photo.image.url || rawEvent.coverPhoto.photo.image.uri, focus, documentStorage)
     if (rawEvent.childEvents) {
       if (rawEvent.childEvents.count === 0 && rawEvent.startTimestampForDisplay) {
         const time = this.getTime(event, eventId)
