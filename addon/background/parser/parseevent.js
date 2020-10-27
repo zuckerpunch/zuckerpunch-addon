@@ -1,4 +1,4 @@
-/* global ObjUtils, DateUtils */
+/* global ObjUtils, DateUtils, tzlookup */
 "use strict"
 
 class ParseEvent {
@@ -184,6 +184,9 @@ class ParseEvent {
   }
 
   resolveTimezoneByLocation (event, settingsStorage) {
+    if (!event.timezone && event.location.gps) {
+      event.timezone = tzlookup(event.location.gps.latitude, event.location.gps.longitude)
+    }
     if (event.location && event.location.city) {
       const key = event.location.city + "|" + event.location.country
 

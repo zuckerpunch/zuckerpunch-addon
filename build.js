@@ -12,6 +12,11 @@ if (!fs.existsSync("addon/utils/purify.min.js")) {
   fs.writeFileSync("addon/utils/purify.min.js", purifyJs)
 }
 
+if (!fs.existsSync("addon/utils/tz.js")) {
+  var tzJs = fs.readFileSync("node_modules/tz-lookup/tz.js", "UTF-8")
+  fs.writeFileSync("addon/utils/tz.js", tzJs)
+}
+
 console.log("building to " + dirBuild)
 
 fs.removeSync(dirBuild)
