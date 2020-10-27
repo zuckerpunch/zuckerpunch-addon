@@ -39,11 +39,11 @@ class ParseEvent {
 
     ObjUtils.CallOnMatch(json, "locations", (locations) => {
       [].forEach.call(locations, rawLocation => {
-        if (rawLocation.freeform) {
-          const event = documentStorage.getForEdit("Event", rawLocation.event_id)
-          if (!event.location) event.location = {}
-          if (!event.location.name) event.location.freeform = rawLocation.freeform
-        }
+        const event = documentStorage.getForEdit("Event", rawLocation.event_id)
+        if (!event.location) event.location = {}
+
+        if (rawLocation.freeform) event.location.freeform = rawLocation.freeform
+        if (rawLocation.gps) event.location.gps = rawLocation.gps
       })
     })
 

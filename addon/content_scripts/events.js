@@ -110,6 +110,18 @@ class ScrapeEvent {
         freeform: elem.innerText
       })
     })
+
+    const mapImageElements = [].filter.call(document.getElementsByTagName("img"), img => img.src && img.src.includes("/static_map.php?") && img.src.includes("&markers="))
+    if (mapImageElements.length > 0) {
+      const geocode = (new URL(mapImageElements[0].src)).searchParams.get("markers").split(",")
+      locations.push({
+        event_id: ScrapeEvent.viewed_event_id,
+        gps: {
+          latitude: geocode[0],
+          longitude: geocode[1]
+        }
+      })
+    }
     if (locations.length > 0) chrome.runtime.sendMessage({ url: ScrapeEvent.pageUrl, jsonRaw: JSON.stringify({ locations: locations }) })
 
     const timeContentAttribs = [].filter.call(document.getElementsByTagName("div"), div => div.getAttribute("content") && div.getAttribute("content").match(/\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(\+|-)\d\d/))
