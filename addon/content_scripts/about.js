@@ -30,6 +30,14 @@ class ScrapeCreator {
       [].forEach.call([].filter.call(document.getElementsByTagName("a"), a => a.href && a.href.match(/\/(pages\/category\/|search\/pages\/\?q=).{1,}/)), categoryAnchor => {
         creator.category.push(categoryAnchor.innerText)
       })
+
+      const mapImageElements = [].filter.call(document.getElementsByTagName("img"), img => img.src && img.src.includes("/static_map.php?") && img.src.includes("&markers="))
+      if (mapImageElements.length > 0) {
+        const geocode = (new URL(mapImageElements[0].src)).searchParams.get("markers").split(",")
+        creator.latitude = geocode[0]
+        creator.longitude = geocode[1]
+      }
+
       const creatorJson = JSON.stringify({ creator: creator })
       chrome.runtime.sendMessage({ url: document.URL, jsonRaw: creatorJson })
     }
