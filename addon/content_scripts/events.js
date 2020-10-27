@@ -77,8 +77,8 @@ class ScrapeEvent {
     })
     if (tags.length > 0) chrome.runtime.sendMessage({ url: ScrapeEvent.pageUrl, jsonRaw: JSON.stringify({ tags: tags }) })
 
-    const topImageElements = [].filter.call(document.getElementsByTagName("img"), img => img.src && img.src.includes("fbcdn.net/v/t1.0-") && img.width > 400)
-    const topImageElement = topImageElements.find(i => i.getAttribute("data-imgperflogname")) || topImageElements.find(t => true)
+    const topImageElements = [].filter.call(document.getElementsByTagName("img"), img => img.src && img.src.includes("fbcdn.net/v/t") && img.width > 400).sort((a, b) => (a.width > b.width) ? 1 : -1)
+    const topImageElement = topImageElements.find(i => i.getAttribute("data-imgperflogname")) || topImageElements ? topImageElements[topImageElements.length - 1] : null
     if (topImageElement) {
       fetch(topImageElement.src, {}) // fetching here get img 'silently' from local cache
         .then(response => response.blob())
