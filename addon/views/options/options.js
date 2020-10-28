@@ -9,7 +9,6 @@ class OptionsBinder {
       endpoint: document.querySelector("#endpoint").value.trim(),
       endpoint_type: document.querySelector("#endpoint_type").value,
       debug: document.querySelector("#debug").checked,
-      // autoexpand: document.querySelector("#autoexpand").checked,
       privacypolicyaccept: document.querySelector("#privacypolicyaccept").checked
     })
   }
@@ -20,7 +19,6 @@ class OptionsBinder {
       document.querySelector("#endpoint_type").value = result.endpoint_type || ""
       document.querySelector("#puncher_id").value = result.puncher_id || "*** ERROR: puncher_id not found ***"
       document.querySelector("#debug").checked = result.debug || false
-      // document.querySelector("#autoexpand").checked = result.autoexpand || false;
       document.querySelector("#privacypolicyaccept").checked = result.privacypolicyaccept || false
     }
 
