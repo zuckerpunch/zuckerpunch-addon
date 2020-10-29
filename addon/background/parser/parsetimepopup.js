@@ -12,7 +12,7 @@ class ParseTimePopup {
       doc.innerHTML = "<html><head><title>dummy</title></head><body>" + sanitizedHtml + "</body></html>"
 
       const eventLinks = [].filter.call(doc.getElementsByTagName("a"), a => a.href && a.href.includes("/events/"))
-      const timeLinks = [].filter.call(doc.getElementsByTagName("a"), a => (a.href && a.href.includes("event_time_id=")) || (a.getAttribute("ajaxify") || "").includes("/events/"))
+      const timeLinks = [].filter.call(doc.getElementsByTagName("a"), a => (a.href && a.href.includes("event_time_id=")) || (a.getAttribute("ajaxify") || "").includes("/events/") || (a.getAttribute("data-hovercard") || "").includes("hovercard.php?id="))
 
       const times = []
       const eventId = eventLinks.length > 0 ? (eventLinks[0].href.match(/([0-9]{10,})/) || [null])[0] : null
