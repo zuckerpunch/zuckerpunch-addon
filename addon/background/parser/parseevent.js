@@ -61,7 +61,7 @@ class ParseEvent {
         const parseddate = DateUtils.parseDate(rawTime.date_text, rawTime.time_text, event.timezone)
         if (parseddate.start > 0) {
           const time = this.getTime(event, rawTime.event_time_id)
-          this.mergeTimes(time, parseddate)
+          this.mergeTimes(time, parseddate, true)
         }
       })
     })
@@ -71,8 +71,11 @@ class ParseEvent {
       const utcInfo = json.data.event.tz_display_name
       childEvents.forEach(c => {
         const time = this.getTime(event, c.id)
-        time.start = new Date((new Date(c.utc_start_timestamp * 1000)).toUTCString().replace("GMT", utcInfo))
-        time.end = new Date((new Date(c.utc_end_timestamp * 1000)).toUTCString().replace("GMT", utcInfo))
+        const newTime = {
+          start: new Date((new Date(c.utc_start_timestamp * 1000)).toUTCString().replace("GMT", utcInfo)),
+          end: new Date((new Date(c.utc_end_timestamp * 1000)).toUTCString().replace("GMT", utcInfo))
+        }
+        this.mergeTimes(time, newTime, false) // not fully trusted, since utcInfo is same for a range of dates and DST change is not covered by fb data
       })
     })
 
@@ -101,7 +104,11 @@ class ParseEvent {
     let eventId = rawEvent.parent_event ? rawEvent.parent_event.id
       : rawEvent.parent_if_exists_or_self ? rawEvent.parent_if_exists_or_self.id : rawEvent.id
     eventId = eventId || url.pathname.match(/([0-9]{10,})/)[0]
-    const eventTimeId = url.searchParams.get("event_time_id") ||
+
+    const rawEventUrl = rawEvent.url ? new URL(rawEvent.url) : null
+    const eventTimeId = rawEvent.id ||
+                        (rawEventUrl !== null ? rawEventUrl.searchParams.get("event_time_id") : null) ||
+                        url.searchParams.get("event_time_id") ||
                         rawEvent.event_time_id_hint ||
                         (rawEvent.url && rawEvent.url.includes(eventId) ? eventId : (url.pathname.match(/([0-9]{10,})/) || [null])[0])
 
@@ -123,11 +130,11 @@ class ParseEvent {
     if (rawEvent.childEvents) {
       if (rawEvent.childEvents.count === 0 && rawEvent.startTimestampForDisplay) {
         const time = this.getTime(event, eventId)
-        this.mergeTimes(time, DateUtils.parseDate(rawEvent.startTimestampForDisplay))
+        this.mergeTimes(time, DateUtils.parseDate(rawEvent.startTimestampForDisplay), true)
       } else {
         rawEvent.childEvents.edges.forEach(edge => {
           const time = this.getTime(event, edge.node.id)
-          this.mergeTimes(time, DateUtils.parseDate(edge.node.currentStartTimestamp))
+          this.mergeTimes(time, DateUtils.parseDate(edge.node.currentStartTimestamp), true)
         })
       }
     }
@@ -173,11 +180,11 @@ class ParseEvent {
     this.resolveTimezoneByLocation(event, settingsStorage)
     if (rawEvent.day_time_sentence) {
       const time = this.getTime(event, eventTimeId)
-      this.mergeTimes(time, DateUtils.parseDate(rawEvent.day_time_sentence, "", event.timezone))
+      this.mergeTimes(time, DateUtils.parseDate(rawEvent.day_time_sentence, "", event.timezone), true)
     }
     if (eventTimeId && rawEvent.startDate) {
       const time = this.getTime(event, eventTimeId)
-      this.mergeTimes(time, DateUtils.parseDate(rawEvent.startDate))
+      this.mergeTimes(time, DateUtils.parseDate(rawEvent.startDate), true)
     }
 
     return event
@@ -221,11 +228,12 @@ class ParseEvent {
     tag.text_locale = textLocale || tag.text_locale
   }
 
-  mergeTimes (a, b) {
-    // the following if is kept around for qa
-    if ((a.start && b.start && a.start.getTime() !== b.start.getTime()) || (a.end && b.end && a.end.getTime() !== b.end.getTime())) console.error("Picked up inconsistent dates for the same event", a, b)
+  mergeTimes (a, b, trustNew) {
+    // fb can be buggy with time info, we detect that here
+    const inconsistent = (a.start && b.start && a.start.getTime() !== b.start.getTime()) || (a.end && b.end && a.end.getTime() !== b.end.getTime())
+    if (inconsistent) console.warn("Picked up inconsistent dates for the same event.", a, b)
 
-    if (!a.start) a.start = b.start
-    if (!a.end) a.end = b.end
+    if ((b.start && trustNew) || !a.start) a.start = b.start
+    if ((b.end && trustNew) || !a.end) a.end = b.end
   }
 }
