@@ -73,7 +73,7 @@ class ParseEvent {
       // fb magic: the tz_display_name match earliest date, but is wrong if tz DST change on later dates, so we compensate for this
       const utcInfo = json.data.event.tz_display_name
       const event = documentStorage.getForEdit("Event", json.data.event.id)
-      const tzname = event.timezone || "Europe/London"
+      const tzname = event.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone // fallback to user local
       const minDate = Math.min.apply(Math, childEvents.map((c) => c.utc_start_timestamp))
       const utcOffset = DateUtils.getTimezoneOffset(buildDate(minDate, utcInfo), tzname)
 
