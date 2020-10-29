@@ -26,5 +26,14 @@ class OptionsBinder {
   }
 }
 
+document.getElementById("clear_caches").onclick = () => {
+  chrome.storage.local.set({
+    crowdSourcedHashes: [],
+    timezoneMap: null,
+    crowdsourcedCounter: null
+  })
+  alert("local storage caches clear - restart all browser windows for effect")
+}
+
 document.addEventListener("DOMContentLoaded", OptionsBinder.restoreOptions)
 document.querySelector("form").addEventListener("submit", OptionsBinder.saveOptions)
