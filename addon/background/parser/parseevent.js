@@ -67,15 +67,26 @@ class ParseEvent {
     })
 
     ObjUtils.CallOnMatch(json, "data.event.child_events.nodes", (childEvents) => {
-      const event = documentStorage.getForEdit("Event", json.data.event.id)
+      const buildDate = (timestamp, utcInfo) => new Date((new Date(timestamp * 1000)).toUTCString().replace("GMT", utcInfo))
+      const addMinutes = (date, m) => date.setTime(date.getTime() + (m * 60 * 1000))
+
+      // fb magic: the tz_display_name match earliest date, but is wrong if tz DST change on later dates, so we compensate for this
       const utcInfo = json.data.event.tz_display_name
+      const event = documentStorage.getForEdit("Event", json.data.event.id)
+      const tzname = event.timezone || "Europe/London"
+      const minDate = Math.min.apply(Math, childEvents.map((c) => c.utc_start_timestamp))
+      const utcOffset = DateUtils.getTimezoneOffset(buildDate(minDate, utcInfo), tzname)
+
       childEvents.forEach(c => {
         const time = this.getTime(event, c.id)
         const newTime = {
-          start: new Date((new Date(c.utc_start_timestamp * 1000)).toUTCString().replace("GMT", utcInfo)),
-          end: new Date((new Date(c.utc_end_timestamp * 1000)).toUTCString().replace("GMT", utcInfo))
+          start: buildDate(c.utc_start_timestamp, utcInfo),
+          end: buildDate(c.utc_end_timestamp, utcInfo)
         }
-        this.mergeTimes(time, newTime, false) // not fully trusted, since utcInfo is same for a range of dates and DST change is not covered by fb data
+        addMinutes(newTime.start, -1 * (utcOffset - DateUtils.getTimezoneOffset(newTime.start, tzname)))
+        addMinutes(newTime.end, -1 * (utcOffset - DateUtils.getTimezoneOffset(newTime.end, tzname)))
+
+        this.mergeTimes(time, newTime, false) // false = not fully trusted, since utcInfo is same for a range of dates and DST change is not covered by fb data
       })
     })
 
