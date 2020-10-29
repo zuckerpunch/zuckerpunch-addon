@@ -33,10 +33,6 @@ class ScrapeEvent {
           const json = JSON.parse(embeddedjson)
           const found = ObjUtils.findObjectByPropertyName(json, "data")
           found.forEach(e => {
-            const parentInfo = ObjUtils.findObjectByPropertyName(e, "parent_if_exists_or_self").find(f => true)
-            if (parentInfo) {
-              ScrapeEvent.viewed_event_id = parentInfo.id
-            }
             chrome.runtime.sendMessage({ url: ScrapeEvent.pageUrl, jsonRaw: JSON.stringify({ data: e }) })
           })
         } catch (e) {
@@ -77,8 +73,8 @@ class ScrapeEvent {
     })
     if (tags.length > 0) chrome.runtime.sendMessage({ url: ScrapeEvent.pageUrl, jsonRaw: JSON.stringify({ tags: tags }) })
 
-    const topImageElements = [].filter.call(document.getElementsByTagName("img"), img => img.src && img.src.includes("fbcdn.net/v/t") && img.width > 400).sort((a, b) => (a.width > b.width) ? 1 : -1)
-    const topImageElement = topImageElements.find(i => i.getAttribute("data-imgperflogname")) || topImageElements ? topImageElements[topImageElements.length - 1] : null
+    const topImageElements = [].filter.call(document.getElementsByTagName("img"), img => img.src && img.src.includes("fbcdn.net/v/t") && img.width > 400).sort((a, b) => (a.naturalWidth < b.naturalWidth) ? 1 : -1)
+    const topImageElement = topImageElements.find(i => i.getAttribute("data-imgperflogname")) || topImageElements ? topImageElements[0] : null
     if (topImageElement) {
       fetch(topImageElement.src, {}) // fetching here get img 'silently' from local cache
         .then(response => response.blob())
