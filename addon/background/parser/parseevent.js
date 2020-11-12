@@ -132,7 +132,7 @@ class ParseEvent {
     if (rawEvent.event_buy_ticket_url) event.ticket_url = rawEvent.event_buy_ticket_url
     if (rawEvent.is_canceled) event.canceled = rawEvent.is_canceled
     if (rawEvent.is_event_draft) event._draft = rawEvent.is_event_draft
-    if (rawEvent.description) event.description = rawEvent.description.text || rawEvent.description
+    if (rawEvent.description) event.description = rawEvent.description.text === "" ? "" : rawEvent.description.text || rawEvent.description
     if (rawEvent.event_description && rawEvent.event_description.text) event.description = rawEvent.event_description.text
     if (rawEvent.details && rawEvent.details.text) event.description = rawEvent.details.text || rawEvent.details
     if (rawEvent.timezone) event.timezone = rawEvent.timezone

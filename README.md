@@ -159,6 +159,7 @@ You cannot publish the data you collect without prior consent from the entity th
 Using the Zuckerpunch add-on is in breach of Facebook's Terms of Service. If you have accepted these terms, using this add-on COULD get your Facebook account banned, but so far this has never happened.
 
 # versions
+- 1.1.1: Improved GPS location pickup, pseudo image pickup for events with a movie banner, timezone resolve using GPS location for fallback, time popup fixes, cache clear feature in settings
 - 1.1.0: Filter JSON in popup via search. Minor: more anon xhr intercept, fixes, chrome debug attach fixes, data pick-up improved for page name
 - 1.0.6: Calling new serverless backend for crowdsourcing, using https.
 - 1.0.5: NPM package DOMPurify upgraded to 2.1.1 (security update).
