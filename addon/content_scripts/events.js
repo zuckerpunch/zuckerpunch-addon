@@ -33,10 +33,6 @@ class ScrapeEvent {
           const json = JSON.parse(embeddedjson)
           const found = ObjUtils.findObjectByPropertyName(json, "data")
           found.forEach(e => {
-            const parentInfo = ObjUtils.findObjectByPropertyName(e, "parent_if_exists_or_self").find(f => true)
-            if (parentInfo) {
-              ScrapeEvent.viewed_event_id = parentInfo.id
-            }
             chrome.runtime.sendMessage({ url: ScrapeEvent.pageUrl, jsonRaw: JSON.stringify({ data: e }) })
           })
         } catch (e) {
@@ -77,8 +73,8 @@ class ScrapeEvent {
     })
     if (tags.length > 0) chrome.runtime.sendMessage({ url: ScrapeEvent.pageUrl, jsonRaw: JSON.stringify({ tags: tags }) })
 
-    const topImageElements = [].filter.call(document.getElementsByTagName("img"), img => img.src && img.src.includes("fbcdn.net/v/t1.0-") && img.width > 400)
-    const topImageElement = topImageElements.find(i => i.getAttribute("data-imgperflogname")) || topImageElements.find(t => true)
+    const topImageElements = [].filter.call(document.getElementsByTagName("img"), img => img.src && img.src.includes("fbcdn.net/v/t") && img.width > 400).sort((a, b) => (a.naturalWidth < b.naturalWidth) ? 1 : -1)
+    const topImageElement = topImageElements.find(i => i.getAttribute("data-imgperflogname")) || topImageElements ? topImageElements[0] : null
     if (topImageElement) {
       fetch(topImageElement.src, {}) // fetching here get img 'silently' from local cache
         .then(response => response.blob())
@@ -110,6 +106,18 @@ class ScrapeEvent {
         freeform: elem.innerText
       })
     })
+
+    const mapImageElements = [].filter.call(document.getElementsByTagName("img"), img => img.src && img.src.includes("/static_map.php?") && img.src.includes("&markers="))
+    if (mapImageElements.length > 0) {
+      const geocode = (new URL(mapImageElements[0].src)).searchParams.get("markers").split(",")
+      locations.push({
+        event_id: ScrapeEvent.viewed_event_id,
+        gps: {
+          latitude: geocode[0],
+          longitude: geocode[1]
+        }
+      })
+    }
     if (locations.length > 0) chrome.runtime.sendMessage({ url: ScrapeEvent.pageUrl, jsonRaw: JSON.stringify({ locations: locations }) })
 
     const timeContentAttribs = [].filter.call(document.getElementsByTagName("div"), div => div.getAttribute("content") && div.getAttribute("content").match(/\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(\+|-)\d\d/))

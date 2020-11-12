@@ -1,4 +1,4 @@
-/* global ObjUtils, DateUtils */
+/* global ObjUtils, DateUtils, tzlookup */
 "use strict"
 
 class ParseEvent {
@@ -39,11 +39,11 @@ class ParseEvent {
 
     ObjUtils.CallOnMatch(json, "locations", (locations) => {
       [].forEach.call(locations, rawLocation => {
-        if (rawLocation.freeform) {
-          const event = documentStorage.getForEdit("Event", rawLocation.event_id)
-          if (!event.location) event.location = {}
-          if (!event.location.name) event.location.freeform = rawLocation.freeform
-        }
+        const event = documentStorage.getForEdit("Event", rawLocation.event_id)
+        if (!event.location) event.location = {}
+
+        if (rawLocation.freeform) event.location.freeform = rawLocation.freeform
+        if (rawLocation.gps) event.location.gps = rawLocation.gps
       })
     })
 
@@ -61,18 +61,32 @@ class ParseEvent {
         const parseddate = DateUtils.parseDate(rawTime.date_text, rawTime.time_text, event.timezone)
         if (parseddate.start > 0) {
           const time = this.getTime(event, rawTime.event_time_id)
-          this.mergeTimes(time, parseddate)
+          this.mergeTimes(time, parseddate, true)
         }
       })
     })
 
     ObjUtils.CallOnMatch(json, "data.event.child_events.nodes", (childEvents) => {
-      const event = documentStorage.getForEdit("Event", json.data.event.id)
+      const buildDate = (timestamp, utcInfo) => new Date((new Date(timestamp * 1000)).toUTCString().replace("GMT", utcInfo))
+      const addMinutes = (date, m) => date.setTime(date.getTime() + (m * 60 * 1000))
+
+      // fb magic: the tz_display_name match earliest date, but is wrong if tz DST change on later dates, so we compensate for this
       const utcInfo = json.data.event.tz_display_name
+      const event = documentStorage.getForEdit("Event", json.data.event.id)
+      const tzname = event.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone // fallback to user local
+      const minDate = Math.min.apply(Math, childEvents.map((c) => c.utc_start_timestamp))
+      const utcOffset = DateUtils.getTimezoneOffset(buildDate(minDate, utcInfo), tzname)
+
       childEvents.forEach(c => {
         const time = this.getTime(event, c.id)
-        time.start = new Date((new Date(c.utc_start_timestamp * 1000)).toUTCString().replace("GMT", utcInfo))
-        time.end = new Date((new Date(c.utc_end_timestamp * 1000)).toUTCString().replace("GMT", utcInfo))
+        const newTime = {
+          start: buildDate(c.utc_start_timestamp, utcInfo),
+          end: buildDate(c.utc_end_timestamp, utcInfo)
+        }
+        addMinutes(newTime.start, -1 * (utcOffset - DateUtils.getTimezoneOffset(newTime.start, tzname)))
+        addMinutes(newTime.end, -1 * (utcOffset - DateUtils.getTimezoneOffset(newTime.end, tzname)))
+
+        this.mergeTimes(time, newTime, false) // false = not fully trusted, since utcInfo is same for a range of dates and DST change is not covered by fb data
       })
     })
 
@@ -101,7 +115,11 @@ class ParseEvent {
     let eventId = rawEvent.parent_event ? rawEvent.parent_event.id
       : rawEvent.parent_if_exists_or_self ? rawEvent.parent_if_exists_or_self.id : rawEvent.id
     eventId = eventId || url.pathname.match(/([0-9]{10,})/)[0]
-    const eventTimeId = url.searchParams.get("event_time_id") ||
+
+    const rawEventUrl = rawEvent.url ? new URL(rawEvent.url) : null
+    const eventTimeId = rawEvent.id ||
+                        (rawEventUrl !== null ? rawEventUrl.searchParams.get("event_time_id") : null) ||
+                        url.searchParams.get("event_time_id") ||
                         rawEvent.event_time_id_hint ||
                         (rawEvent.url && rawEvent.url.includes(eventId) ? eventId : (url.pathname.match(/([0-9]{10,})/) || [null])[0])
 
@@ -114,22 +132,20 @@ class ParseEvent {
     if (rawEvent.event_buy_ticket_url) event.ticket_url = rawEvent.event_buy_ticket_url
     if (rawEvent.is_canceled) event.canceled = rawEvent.is_canceled
     if (rawEvent.is_event_draft) event._draft = rawEvent.is_event_draft
-    if (rawEvent.description) event.description = rawEvent.description.text || rawEvent.description
+    if (rawEvent.description) event.description = rawEvent.description.text === "" ? "" : rawEvent.description.text || rawEvent.description
     if (rawEvent.event_description && rawEvent.event_description.text) event.description = rawEvent.event_description.text
     if (rawEvent.details && rawEvent.details.text) event.description = rawEvent.details.text || rawEvent.details
     if (rawEvent.timezone) event.timezone = rawEvent.timezone
     if (rawEvent.tz_display_name && rawEvent.tz_display_name.includes("/")) event.timezone = rawEvent.tz_display_name
-
     if (rawEvent.event_creator && !event.creator_ids.includes(rawEvent.event_creator.id)) event.creator_ids.push(rawEvent.event_creator.id)
-    if (rawEvent.coverPhoto && rawEvent.coverPhoto.photo) this.ensureImage(event, "large", rawEvent.coverPhoto.photo.image.url || rawEvent.coverPhoto.photo.image.uri, focus, documentStorage)
     if (rawEvent.childEvents) {
       if (rawEvent.childEvents.count === 0 && rawEvent.startTimestampForDisplay) {
         const time = this.getTime(event, eventId)
-        this.mergeTimes(time, DateUtils.parseDate(rawEvent.startTimestampForDisplay))
+        this.mergeTimes(time, DateUtils.parseDate(rawEvent.startTimestampForDisplay), true)
       } else {
         rawEvent.childEvents.edges.forEach(edge => {
           const time = this.getTime(event, edge.node.id)
-          this.mergeTimes(time, DateUtils.parseDate(edge.node.currentStartTimestamp))
+          this.mergeTimes(time, DateUtils.parseDate(edge.node.currentStartTimestamp), true)
         })
       }
     }
@@ -175,17 +191,20 @@ class ParseEvent {
     this.resolveTimezoneByLocation(event, settingsStorage)
     if (rawEvent.day_time_sentence) {
       const time = this.getTime(event, eventTimeId)
-      this.mergeTimes(time, DateUtils.parseDate(rawEvent.day_time_sentence, "", event.timezone))
+      this.mergeTimes(time, DateUtils.parseDate(rawEvent.day_time_sentence, "", event.timezone), true)
     }
     if (eventTimeId && rawEvent.startDate) {
       const time = this.getTime(event, eventTimeId)
-      this.mergeTimes(time, DateUtils.parseDate(rawEvent.startDate))
+      this.mergeTimes(time, DateUtils.parseDate(rawEvent.startDate), true)
     }
 
     return event
   }
 
   resolveTimezoneByLocation (event, settingsStorage) {
+    if (!event.timezone && event.location.gps) {
+      event.timezone = tzlookup(event.location.gps.latitude, event.location.gps.longitude)
+    }
     if (event.location && event.location.city) {
       const key = event.location.city + "|" + event.location.country
 
@@ -220,11 +239,12 @@ class ParseEvent {
     tag.text_locale = textLocale || tag.text_locale
   }
 
-  mergeTimes (a, b) {
-    // the following if is kept around for qa
-    if ((a.start && b.start && a.start.getTime() !== b.start.getTime()) || (a.end && b.end && a.end.getTime() !== b.end.getTime())) console.error("Picked up inconsistent dates for the same event", a, b)
+  mergeTimes (a, b, trustNew) {
+    // fb can be buggy with time info, we detect that here
+    const inconsistent = (a.start && b.start && a.start.getTime() !== b.start.getTime()) || (a.end && b.end && a.end.getTime() !== b.end.getTime())
+    if (inconsistent) console.warn("Picked up inconsistent dates for the same event.", a, b)
 
-    if (!a.start) a.start = b.start
-    if (!a.end) a.end = b.end
+    if ((b.start && trustNew) || !a.start) a.start = b.start
+    if ((b.end && trustNew) || !a.end) a.end = b.end
   }
 }

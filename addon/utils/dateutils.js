@@ -18,6 +18,24 @@ class DateUtils {
     return null
   }
 
+  static getTimezoneOffset (d, timezone) {
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const shortTz = this.getShortTimeZoneName(d, timezone)
+    const datebase = `${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()} ${d.getHours()}:${d.getMinutes()} `
+    const asUtc = new Date(datebase + "UTC")
+    const asLocal = new Date(datebase + shortTz)
+    return (asLocal - asUtc) / (1000 * 60) // minutes diff
+  }
+
+  static getShortTimeZoneName (d, timeZone) {
+    const o = new Intl.DateTimeFormat("en", {
+      timeZone: timeZone,
+      timeZoneName: "short"
+    })
+
+    return o.formatToParts(d).find(p => p.type === "timeZoneName").value
+  }
+
   static tryGetUtcString (timeString) {
     if (!timeString) return null
 

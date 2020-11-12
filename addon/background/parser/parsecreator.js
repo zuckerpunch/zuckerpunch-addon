@@ -10,6 +10,8 @@ class ParseCreator {
       rawCreator.website.forEach(website => { if (!creator.website.includes(website)) creator.website.push(website) })
       rawCreator.email.forEach(email => { if (!creator.email.includes(email)) creator.email.push(email) })
       rawCreator.category.forEach(category => { if (!creator.category.includes(category)) creator.category.push(category) })
+      if (rawCreator.latitude) creator.latitude = rawCreator.latitude
+      if (rawCreator.longitude) creator.longitude = rawCreator.longitude
     })
 
     ObjUtils.CallOnMatch(json, "data.venue", (rawCreator) => {
