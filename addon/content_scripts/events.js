@@ -113,8 +113,8 @@ class ScrapeEvent {
       locations.push({
         event_id: ScrapeEvent.viewed_event_id,
         gps: {
-          latitude: geocode[0],
-          longitude: geocode[1]
+          latitude: parseFloat(geocode[0]),
+          longitude: parseFloat(geocode[1])
         }
       })
     }

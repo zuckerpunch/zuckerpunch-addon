@@ -10,8 +10,8 @@ class ParseCreator {
       rawCreator.website.forEach(website => { if (!creator.website.includes(website)) creator.website.push(website) })
       rawCreator.email.forEach(email => { if (!creator.email.includes(email)) creator.email.push(email) })
       rawCreator.category.forEach(category => { if (!creator.category.includes(category)) creator.category.push(category) })
-      if (rawCreator.latitude) creator.latitude = rawCreator.latitude
-      if (rawCreator.longitude) creator.longitude = rawCreator.longitude
+      if (rawCreator.latitude) creator.latitude = parseFloat(rawCreator.latitude)
+      if (rawCreator.longitude) creator.longitude = parseFloat(rawCreator.longitude)
     })
 
     ObjUtils.CallOnMatch(json, "data.venue", (rawCreator) => {
@@ -34,8 +34,8 @@ class ParseCreator {
           })
         }
         if (rawCreator.page_about_fields.address && rawCreator.page_about_fields.address.full_address) creator.address = rawCreator.page_about_fields.address.full_address
-        if (rawCreator.page_about_fields.latitude) creator.latitude = rawCreator.page_about_fields.latitude
-        if (rawCreator.page_about_fields.longitude) creator.longitude = rawCreator.page_about_fields.longitude
+        if (rawCreator.page_about_fields.latitude) creator.latitude = parseFloat(rawCreator.page_about_fields.latitude)
+        if (rawCreator.page_about_fields.longitude) creator.longitude = parseFloat(rawCreator.page_about_fields.longitude)
       }
     })
 
