@@ -1,6 +1,7 @@
 const fs = require("fs-extra")
 const zipFolder = require("zip-a-folder")
 const path = require("path")
+const beautify = require("js-beautify").js
 const dirSrc = "./addon"
 const dirBuild = "./build"
 const dirMozilla = dirBuild + "/mozilla"
@@ -14,6 +15,7 @@ if (!fs.existsSync("addon/utils/purify.min.js")) {
 
 if (!fs.existsSync("addon/utils/tz.js")) {
   var tzJs = fs.readFileSync("node_modules/tz-lookup/tz.js", "UTF-8")
+  tzJs = beautify(tzJs)
   fs.writeFileSync("addon/utils/tz.js", tzJs)
 }
 
