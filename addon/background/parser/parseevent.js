@@ -181,7 +181,7 @@ class ParseEvent {
         if (rawEvent.location.address) {
           if (rawEvent.location.address.streetAddress) event.location.streetAddress = rawEvent.location.address.streetAddress
           if (rawEvent.location.address.postalCode) event.location.zip = rawEvent.location.address.postalCode
-          event.location.city = rawEvent.location.address.addressLocality || rawEvent.location.address.city.cityContextualName
+          event.location.city = rawEvent.location.address.addressLocality || (rawEvent.location.address.city ? rawEvent.location.address.city.cityContextualName : null)
           if (rawEvent.location.address.addressCountry) event.location.country = rawEvent.location.address.addressCountry
         }
       } else if (rawEvent.location.includes("·")) {

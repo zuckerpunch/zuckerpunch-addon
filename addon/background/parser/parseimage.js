@@ -7,7 +7,7 @@ class ParseImage {
         const event = documentStorage.getForEdit("Event", img.event_id)
         const blob = this.dataURItoBlob(img.base64)
         blobStorage.add(img.src, blob)
-        this.ensureImage(event, "large", img.src, documentStorage)
+        this.ensureImage(event, "poster", img.src, img.width, img.height, documentStorage)
       })
     }
   }
@@ -18,9 +18,9 @@ class ParseImage {
     ]
   }
 
-  ensureImage (event, imageId, _tmpurl, documentStorage) {
-    event.images[imageId] = `${event.id}-${imageId}`
-    const image = documentStorage.getForEdit("Image", event.images[imageId])
+  ensureImage (event, mediaId, _tmpurl, width, height, documentStorage) {
+    event.media[mediaId] = { id: `${event.id}-${mediaId}`, width: width, height: height }
+    const image = documentStorage.getForEdit("Image", event.media[mediaId].id)
     image._tmpurl = _tmpurl
   }
 
