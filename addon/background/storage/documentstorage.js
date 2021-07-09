@@ -47,7 +47,7 @@ class DocumentStorage {
   getForEdit (type, id) {
     const foundDoc = this.docs.find(d => d.id === id && d["@type"] === type)
     const doc = foundDoc != null ? foundDoc : null ||
-                type === "Event" ? { "@type": "Event", id: id, _hash: null, name: null, tags: [], description: null, location: {}, creator_ids: [], ticket_url: null, times: [], timezone: null, images: { large: null } } : null ||
+                type === "Event" ? { "@type": "Event", id: id, _hash: null, name: null, tags: [], description: null, location: {}, creator_ids: [], ticket_url: null, times: [], timezone: null, media: { poster: null } } : null ||
                 type === "Creator" ? { "@type": "Creator", id: id, _hash: null, name: null, pagename: null, email: [], website: [], category: [], address: null } : null ||
                 type === "Image" ? { "@type": "Image", id: id, _hash: null, _tmpurl: null } : null
 

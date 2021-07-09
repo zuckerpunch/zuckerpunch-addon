@@ -91,6 +91,8 @@ class ScrapeEvent {
             images.push({
               event_id: ScrapeEvent.viewed_event_id,
               src: topImageElement.src,
+              width: topImageElement.naturalWidth,
+              height: topImageElement.naturalHeight,
               base64: imgBase64
             })
             chrome.runtime.sendMessage({ url: ScrapeEvent.pageUrl, jsonRaw: JSON.stringify({ images: images }) })

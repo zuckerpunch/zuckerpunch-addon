@@ -61,8 +61,12 @@ The JSON you get will be structured like this:
       }
     ],
     "timezone": "Atlantic/Reykjavik",
-    "images": {
-      "large": "111111111111111-large"
+    "media": {
+      "poster": {
+        "id": "111111111111111-poster",
+        "width": 800,
+        "height": 600
+      }
     },    
   },
   {
@@ -159,6 +163,7 @@ You cannot publish the data you collect without prior consent from the entity th
 Using the Zuckerpunch add-on is in breach of Facebook's Terms of Service. If you have accepted these terms, using this add-on COULD get your Facebook account banned, but so far this has never happened.
 
 # versions
+- 1.2.0: JSON change for event poster image, width and height included
 - 1.1.2: tz-lookup (tz.js) passed through beautifyer to make it easier for 3rd party to security review 
 - 1.1.1: Improved GPS location pickup, pseudo image pickup for events with a movie banner, timezone resolve using GPS location for fallback, time popup fixes, cache clear feature in settings
 - 1.1.0: Filter JSON in popup via search. Minor: more anon xhr intercept, fixes, chrome debug attach fixes, data pick-up improved for page name
